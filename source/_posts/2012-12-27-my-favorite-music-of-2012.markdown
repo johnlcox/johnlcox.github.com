@@ -6,8 +6,6 @@ slug: my-favorite-music-of-2012
 title: My Favorite Music of 2012
 wordpress_id: 50
 categories:
-- Random
-tags:
 - music
 ---
 

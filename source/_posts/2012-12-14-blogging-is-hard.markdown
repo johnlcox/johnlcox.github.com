@@ -6,8 +6,6 @@ slug: blogging-is-hard
 title: Blogging is Hard
 wordpress_id: 11
 categories:
-- Random
-tags:
 - blogging
 ---
 

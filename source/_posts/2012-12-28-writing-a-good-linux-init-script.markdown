@@ -6,9 +6,6 @@ slug: writing-a-good-linux-init-script
 title: Writing a Good Linux Init Script
 wordpress_id: 83
 categories:
-- Programming
-- Technology
-tags:
 - java
 - linux
 - shell

@@ -6,8 +6,6 @@ slug: drumming-as-exercise-routine
 title: Drumming as Exercise Routine
 wordpress_id: 25
 categories:
-- Random
-tags:
 - drums
 - exercise
 - running
