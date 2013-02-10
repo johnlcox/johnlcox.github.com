@@ -17,9 +17,7 @@ FinalizedProcess implements Closable and in its close method it makes sure that 
 
 For the two remaining pitfalls  the problem of process grandchildren not being kill when a subprocess is killed cannot be remedied via code, so that will still require user knowledge to avoid.  As for the prompt consumption of subprocess output, I don't have a need for discarding the output, so the initial version of process-warden doesn't provide any functionality for consuming the output.  In a future release I hope to add class that will silently consume the output and error streams along with a method on FinalizedProcessBuilder to enable the silent consumption.
 
-So how do you use process-warden?  It's easy.
-Once you have the dependency, you can use the FinalizedProcessBuilder class to create a FinalizedProcess to execute:
-
+So how do you use process-warden?  It's easy.  Pull it into your maven project:
 ```xml
 <dependency>
 	<groupId>com.leacox.process</groupId>
@@ -28,9 +26,20 @@ Once you have the dependency, you can use the FinalizedProcessBuilder class to c
 </dependency>
 ```
 
+Use FinalizedProcessBuilder to create a FinalizedProcess to execute:
 ```java
+// With Java 7
 FinalizedProcessBuilder pb = new FinalizedProcessBuilder("myCommand", "myArg");
 try (FinalizedProcess process = pb.start()) {
-    int returnVal = process.waitFor(5000);
+    int returnVal = process.waitFor(5000); // 5 second timeout
+}
+
+// With Java 6
+FinalizedProcessBuilder pb = new FinalizedProcessBuilder("myCommand", "myArg");
+FinalizedProcess process = pb.start();
+try {
+    int returnVal = process.waitFor(5000); // 5 second timeout
+} finally {
+    process.close();
 }
 ```
