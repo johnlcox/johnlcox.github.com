@@ -132,7 +132,7 @@ ga('send', 'pageview');
     
 
     <footer class="article-footer">
-      <a data-url="http://johnlcox.github.com/2015/10/26/2015-10-25-staying-motivated-on-side-projects/" data-id="ciqh77yxv000g7wjxjxuptnmx" class="article-share-link">
+      <a data-url="http://johnlcox.github.com/2015/10/26/2015-10-25-staying-motivated-on-side-projects/" data-id="ciqh7esje000gf0jxilv2ufcu" class="article-share-link">
         <i class="fa fa-share"></i> Share
       </a>
       
@@ -184,9 +184,9 @@ ga('send', 'pageview');
 <p>The expressions library pattern matching was closer to what I had in mind. It can extract top-level and nested values, but it requires implementing a ‘constructor’ method for anything you want to match on and doesn’t built-in matching for things like <code>Optional</code> or <code>List</code>. At this point I decided I’d give a shot at implementing pattern matching in Java 8 that is as close to the Scala pattern matching as possible. I like to try to come up with a good name for my projects, so I spent some time with a thesaurus looking for words related to ‘matching’ and ‘patterns’, and I eventually landed on <a href="http://dictionary.reference.com/browse/motif" target="_blank" rel="external">motif</a>.</p>
 <p>Before I go into some details about the process of implementing motif, below are some examples of what code using motif might look like.</p>
 <p>Matching on Optional:</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">Optional&lt;Person&gt; personOpt = getPerson();</div><div class="line">match(personOpt)</div><div class="line">    .when(some(any())).then(person -&gt; doStuff(person))</div><div class="line">    .when(none()).then(() -&gt; System.out.println(<span class="string">"Person not found"</span>))</div><div class="line">    .doMatch();</div></pre></td></tr></table></figure>
+<figure class="highlight java"><table><tr><td class="code"><pre><div class="line">Optional&lt;Person&gt; personOpt = getPerson();</div><div class="line">match(personOpt)</div><div class="line">    .when(some(any())).then(person -&gt; doStuff(person))</div><div class="line">    .when(none()).then(() -&gt; System.out.println(<span class="string">"Person not found"</span>))</div><div class="line">    .doMatch();</div></pre></td></tr></table></figure>
 <p>Nested matching:</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">Optional&lt;Tuple2&lt;String, String&gt;&gt; opt = Optional.of(Tuple2.of(<span class="string">"first"</span>, <span class="string">"second"</span>));</div><div class="line">match(opt)</div><div class="line">    .when(some(tuple2(eq(<span class="string">"third"</span>), any()))).then(b -&gt; doStuff(b))</div><div class="line">    .when(some(tuple2(any(), eq(<span class="string">"second"</span>)))).then(a -&gt; doStuff(a))</div><div class="line">    .when(none()).then(() -&gt; System.out.println(<span class="string">"Tuple not found"</span>))</div><div class="line">    .doMatch();</div></pre></td></tr></table></figure>
+<figure class="highlight java"><table><tr><td class="code"><pre><div class="line">Optional&lt;Tuple2&lt;String, String&gt;&gt; opt = Optional.of(Tuple2.of(<span class="string">"first"</span>, <span class="string">"second"</span>));</div><div class="line">match(opt)</div><div class="line">    .when(some(tuple2(eq(<span class="string">"third"</span>), any()))).then(b -&gt; doStuff(b))</div><div class="line">    .when(some(tuple2(any(), eq(<span class="string">"second"</span>)))).then(a -&gt; doStuff(a))</div><div class="line">    .when(none()).then(() -&gt; System.out.println(<span class="string">"Tuple not found"</span>))</div><div class="line">    .doMatch();</div></pre></td></tr></table></figure>
 <p>Checkout the <a href="http://john.leacox.com/motif/" target="_blank" rel="external">Github page</a> or <a href="https://github.com/johnlcox/motif" target="_blank" rel="external">Github repo</a> for additional details. Version 0.1 of motif is available from maven central. It is a little more verbose (horizontally) than Scala, but it provides much of the same functionality. Currently, it supports extracting a maximum of 3 parameters, whereas Scala supports up to 22 in 2.10 and possibly unlimited in 2.11+? I’ve rarely found myself needing to extract more than 3 parameters in Scala, so I thought this would be an OK limitation for now. Support for additional parameters could be added in the future, but it will require writing additional code generation logic.</p>
 <p>Motif provides many useful pattern matchers out of the box, but it is also very extensible. A Guava extension could be created, for instance, that provides matchers for Guava’s <code>Optional</code> and any other Guava concepts that would be useful to match on. The motif-generator project provides builders for generating matcher cases for extensions. <a href="https://github.com/johnlcox/motif/blob/master/generator/src/main/java/com/leacox/motif/cases/OptionalCasesGenerator.java" target="_blank" rel="external">OptionalCasesGenerator</a> is a good example for using the generator.</p>
 <p>The implementation of the Motif pattern matching happened in three phases. The initial phase was a varargs method that accepted the matching cases, and automatically executed the matching. This ran into ambiguity issues for consumers of the code, so I ended up scrapping it and converting to a fluent interface. By using a fluent interface, I could use intermediate classes to track types and avoid ambiguity. This second phase led to what is essentially the final API, except without nested extraction. Once I saw that the fluent interface was working well, I added nested extraction as a third phase. The nested extraction leads to a bit of combinatorial explosion of the API, so I added code generation during this phase to reduce the likelyhood of errors and to avoid writing very similar code multiple times. The code generation portion, is a separate library, and makes it easy for third party extensions to generate all of the necessary methods needed.</p>
@@ -201,7 +201,7 @@ ga('send', 'pageview');
     
 
     <footer class="article-footer">
-      <a data-url="http://johnlcox.github.com/2015/08/13/2015-08-06-implementing-scala-like-pattern-matching-in-java-8/" data-id="ciqh77yxs000d7wjxnrlsuf22" class="article-share-link">
+      <a data-url="http://johnlcox.github.com/2015/08/13/2015-08-06-implementing-scala-like-pattern-matching-in-java-8/" data-id="ciqh7esjd000df0jxprjcd0yt" class="article-share-link">
         <i class="fa fa-share"></i> Share
       </a>
       
@@ -252,8 +252,8 @@ ga('send', 'pageview');
 <p>FinalizedProcess implements Closable and in its close method it makes sure that all of the subprocess streams are closed as well as optionally destroying the subprocess. It also has a waitFor method that takes a timeout in milliseconds instead of a no parameter waitFor. If the subprocess execution takes longer than the timeout, then an InterruptedException will be thrown and the interrupted flag will be cleared when InterruptedExceptions are thrown. With these additions three of the five common pitfalls are remedied.</p>
 <p>For the two remaining pitfalls the problem of process grandchildren not being kill when a subprocess is killed cannot be remedied via code, so that will still require user knowledge to avoid. As for the prompt consumption of subprocess output, I didn’t have an immediate need for discarding the output, so the initial version of process-warden doesn’t provide any functionality for consuming the output. In a future release I hope to add a class that will silently consume the output and error streams along with a method on FinalizedProcessBuilder to enable the silent consumption.</p>
 <p>So how do you use process-warden? It’s easy. </p>
-<p>Add it to your maven project:<br><figure class="highlight xml"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></div><div class="line">	<span class="tag">&lt;<span class="name">groupId</span>&gt;</span>com.leacox.process<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></div><div class="line">	<span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>process−warden<span class="tag">&lt;<span class="name">artifactId</span>&gt;</span></div><div class="line">	<span class="tag">&lt;<span class="name">version</span>&gt;</span>1.0.0<span class="tag">&lt;/<span class="name">version</span>&gt;</span></div><div class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></div></pre></td></tr></table></figure></p>
-<p>Use FinalizedProcessBuilder to create a FinalizedProcess to execute:<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div></pre></td><td class="code"><pre><div class="line"><span class="comment">// With Java 7</span></div><div class="line">FinalizedProcessBuilder pb = <span class="keyword">new</span> FinalizedProcessBuilder(<span class="string">"myCommand"</span>, <span class="string">"myArg"</span>);</div><div class="line"><span class="keyword">try</span> (FinalizedProcess process = pb.start()) &#123;</div><div class="line">  <span class="keyword">int</span> returnVal = process.waitFor(<span class="number">5000</span>); <span class="comment">// 5 second timeout</span></div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="comment">// With Java 6</span></div><div class="line">FinalizedProcessBuilder pb = <span class="keyword">new</span> FinalizedProcessBuilder(<span class="string">"myCommand"</span>, <span class="string">"myArg"</span>);</div><div class="line">FinalizedProcess process = pb.start();</div><div class="line"><span class="keyword">try</span> &#123;</div><div class="line">  <span class="keyword">int</span> returnVal = process.waitFor(<span class="number">5000</span>); <span class="comment">// 5 second timeout</span></div><div class="line">&#125; <span class="keyword">finally</span> &#123;</div><div class="line">  process.close();</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>Add it to your maven project:<br><figure class="highlight xml"><table><tr><td class="code"><pre><div class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></div><div class="line">	<span class="tag">&lt;<span class="name">groupId</span>&gt;</span>com.leacox.process<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></div><div class="line">	<span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>process−warden<span class="tag">&lt;<span class="name">artifactId</span>&gt;</span></div><div class="line">	<span class="tag">&lt;<span class="name">version</span>&gt;</span>1.0.0<span class="tag">&lt;/<span class="name">version</span>&gt;</span></div><div class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></div></pre></td></tr></table></figure></p>
+<p>Use FinalizedProcessBuilder to create a FinalizedProcess to execute:<br><figure class="highlight java"><table><tr><td class="code"><pre><div class="line"><span class="comment">// With Java 7</span></div><div class="line">FinalizedProcessBuilder pb = <span class="keyword">new</span> FinalizedProcessBuilder(<span class="string">"myCommand"</span>, <span class="string">"myArg"</span>);</div><div class="line"><span class="keyword">try</span> (FinalizedProcess process = pb.start()) &#123;</div><div class="line">  <span class="keyword">int</span> returnVal = process.waitFor(<span class="number">5000</span>); <span class="comment">// 5 second timeout</span></div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="comment">// With Java 6</span></div><div class="line">FinalizedProcessBuilder pb = <span class="keyword">new</span> FinalizedProcessBuilder(<span class="string">"myCommand"</span>, <span class="string">"myArg"</span>);</div><div class="line">FinalizedProcess process = pb.start();</div><div class="line"><span class="keyword">try</span> &#123;</div><div class="line">  <span class="keyword">int</span> returnVal = process.waitFor(<span class="number">5000</span>); <span class="comment">// 5 second timeout</span></div><div class="line">&#125; <span class="keyword">finally</span> &#123;</div><div class="line">  process.close();</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
 <p>If you are currently using Process and ProcessBuilder, give process-warden a shot. It should help simplify your code. I appreciate any feedback or suggestions. Feel free to log issues or fork the <a href="https://github.com/johnlcox/process-warden" target="_blank" rel="external">project</a> on github.</p>
 
       
@@ -265,7 +265,7 @@ ga('send', 'pageview');
     
 
     <footer class="article-footer">
-      <a data-url="http://johnlcox.github.com/2013/02/11/2013-02-11-a-safer-way-to-create-java-subprocesses/" data-id="ciqh77yxr000c7wjxi487g06x" class="article-share-link">
+      <a data-url="http://johnlcox.github.com/2013/02/11/2013-02-11-a-safer-way-to-create-java-subprocesses/" data-id="ciqh7esjc000cf0jx3j7gfvh1" class="article-share-link">
         <i class="fa fa-share"></i> Share
       </a>
       
@@ -313,10 +313,10 @@ ga('send', 'pageview');
       
         <p>A lot of server software runs on Java, but the different Java processes are listed as simply <code>Java</code> via commands like <code>top</code> or <code>ps -ef</code>. One feature of the <a href="http://www.stackify.com" target="_blank" rel="external">Stackify</a> agent is tracking the running processes on a server. I needed a way to identify what each Java process really was in a fairly simple and concise way, but there isn’t a clear winner in the output of the top or ps commands.</p>
 <p>Running <code>ps -ef | grep java</code> will output something nasty, similar to what follows. You can likely figure out what the Java process is actually running from the args — the example below obviously being tomcat — however, it’s not the most readable and doesn’t give a clear and concise value to display to a user in the Stackify web site. The user of the process below also indicates that it is running tomcat, but that won’t be the case for all Java processes.</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">tomcat7 41298 1 5 18:05 ? 00:00:03 /usr/lib/jvm/default-java/bin/java -Djava.util.logging.config.file=/var/lib/tomcat7/conf/logging.properties -Djava.awt.headless=true -Xmx128m -XX:+UseConcMarkSweepGC -Djava.util.logging.manager=org.apache.juli.ClassLoaderLogManager -Djava.endorsed.dirs=/usr/share/tomcat7/endorsed -classpath /usr/share/tomcat7/bin/bootstrap.jar:/usr/share/tomcat7/bin/tomcat-juli.jar -Dcatalina.base=/var/lib/tomcat7 -Dcatalina.home=/usr/share/tomcat7 -Djava.io.tmpdir=/tmp/tomcat7-tomcat7-tmp org.apache.catalina.startup.Bootstrap start</div></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="code"><pre><div class="line">tomcat7 41298 1 5 18:05 ? 00:00:03 /usr/lib/jvm/default-java/bin/java -Djava.util.logging.config.file=/var/lib/tomcat7/conf/logging.properties -Djava.awt.headless=true -Xmx128m -XX:+UseConcMarkSweepGC -Djava.util.logging.manager=org.apache.juli.ClassLoaderLogManager -Djava.endorsed.dirs=/usr/share/tomcat7/endorsed -classpath /usr/share/tomcat7/bin/bootstrap.jar:/usr/share/tomcat7/bin/tomcat-juli.jar -Dcatalina.base=/var/lib/tomcat7 -Dcatalina.home=/usr/share/tomcat7 -Djava.io.tmpdir=/tmp/tomcat7-tomcat7-tmp org.apache.catalina.startup.Bootstrap start</div></pre></td></tr></table></figure>
 <p>I decided it might work to differentiate the Java processes by working directory, but I wasn’t sure if there was a good way to find the working directory. Through some Google searches I discovered the <code>pwdx</code> command. The <code>pwdx</code> command takes a list of pids as parameters and outputs a row with the pid and the working directory for each pid. The working directory doesn’t work for all situations, but I’ve found it generally gives a concise way of determining what a Java process is actually running. I’m certainly open to suggestions if anyone has a better idea.</p>
 <p>Running the pwdx command for the output above — <code>sudo pwdx 41298</code> — leads to the following output. By combining this with the process name I can give the Java processes a more informative name when displayed in the Stackify website. This Java process would be displayed as <code>Java (/var/lib/tomcat7)</code>.</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">41298: /var/lib/tomcat7</div></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="code"><pre><div class="line">41298: /var/lib/tomcat7</div></pre></td></tr></table></figure>
       
     </div>
 
@@ -326,7 +326,7 @@ ga('send', 'pageview');
     
 
     <footer class="article-footer">
-      <a data-url="http://johnlcox.github.com/2013/01/17/2013-02-07-differentiate-java-processes-by-working-directory/" data-id="ciqh77yxh00067wjxgto941wu" class="article-share-link">
+      <a data-url="http://johnlcox.github.com/2013/01/17/2013-02-07-differentiate-java-processes-by-working-directory/" data-id="ciqh7esj30006f0jx3agj11zq" class="article-share-link">
         <i class="fa fa-share"></i> Share
       </a>
       
@@ -389,7 +389,7 @@ ga('send', 'pageview');
     
 
     <footer class="article-footer">
-      <a data-url="http://johnlcox.github.com/2013/01/07/2013-01-07-drumming-as-exercise-routine/" data-id="ciqh77yxe00047wjxtlntsse3" class="article-share-link">
+      <a data-url="http://johnlcox.github.com/2013/01/07/2013-01-07-drumming-as-exercise-routine/" data-id="ciqh7esj00004f0jx3mweepjo" class="article-share-link">
         <i class="fa fa-share"></i> Share
       </a>
       
@@ -449,7 +449,7 @@ ga('send', 'pageview');
     
 
     <footer class="article-footer">
-      <a data-url="http://johnlcox.github.com/2012/12/28/2012-12-28-writing-a-good-linux-init-script/" data-id="ciqh77yxc00037wjxnmv0cm9r" class="article-share-link">
+      <a data-url="http://johnlcox.github.com/2012/12/28/2012-12-28-writing-a-good-linux-init-script/" data-id="ciqh7esiy0003f0jx03mk0s8x" class="article-share-link">
         <i class="fa fa-share"></i> Share
       </a>
       
@@ -517,7 +517,7 @@ ga('send', 'pageview');
     
 
     <footer class="article-footer">
-      <a data-url="http://johnlcox.github.com/2012/12/27/2012-12-27-my-favorite-music-of-2012/" data-id="ciqh77yx600017wjxpgxme3z6" class="article-share-link">
+      <a data-url="http://johnlcox.github.com/2012/12/27/2012-12-27-my-favorite-music-of-2012/" data-id="ciqh7esis0001f0jxhsy21om1" class="article-share-link">
         <i class="fa fa-share"></i> Share
       </a>
       
@@ -574,7 +574,7 @@ ga('send', 'pageview');
     
 
     <footer class="article-footer">
-      <a data-url="http://johnlcox.github.com/2012/12/14/2012-12-14-blogging-is-hard/" data-id="ciqh77yx100007wjxz45i1hgs" class="article-share-link">
+      <a data-url="http://johnlcox.github.com/2012/12/14/2012-12-14-blogging-is-hard/" data-id="ciqh7esio0000f0jxb9bi5448" class="article-share-link">
         <i class="fa fa-share"></i> Share
       </a>
       
