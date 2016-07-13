@@ -107,7 +107,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://john.leacox.com/2015/10/26/staying-motivated-on-side-projects/" data-id="ciqk8c6yr000ib8jxdiclr2zf" class="article-share-link">Share</a>
+      <a data-url="http://john.leacox.com/2015/10/26/staying-motivated-on-side-projects/" data-id="ciqkuwsm8000fptjxvu28dqvs" class="article-share-link">Share</a>
       
         <a href="http://john.leacox.com/2015/10/26/staying-motivated-on-side-projects/#disqus_thread" class="article-comment-link">Comments</a>
       
@@ -153,7 +153,7 @@
 <figure class="highlight java"><table><tr><td class="code"><pre><div class="line">Optional&lt;Person&gt; personOpt = getPerson();</div><div class="line">match(personOpt)</div><div class="line">    .when(some(any())).then(person -&gt; doStuff(person))</div><div class="line">    .when(none()).then(() -&gt; System.out.println(<span class="string">"Person not found"</span>))</div><div class="line">    .doMatch();</div></pre></td></tr></table></figure>
 <p>Nested matching:</p>
 <figure class="highlight java"><table><tr><td class="code"><pre><div class="line">Optional&lt;Tuple2&lt;String, String&gt;&gt; opt = Optional.of(Tuple2.of(<span class="string">"first"</span>, <span class="string">"second"</span>));</div><div class="line">match(opt)</div><div class="line">    .when(some(tuple2(eq(<span class="string">"third"</span>), any()))).then(b -&gt; doStuff(b))</div><div class="line">    .when(some(tuple2(any(), eq(<span class="string">"second"</span>)))).then(a -&gt; doStuff(a))</div><div class="line">    .when(none()).then(() -&gt; System.out.println(<span class="string">"Tuple not found"</span>))</div><div class="line">    .doMatch();</div></pre></td></tr></table></figure>
-<p>Checkout the <a href="http://john.leacox.com/motif/" target="_blank" rel="external">Github page</a> or <a href="https://github.com/johnlcox/motif" target="_blank" rel="external">Github repo</a> for additional details. Version 0.1 of motif is available from maven central. It is a little more verbose (horizontally) than Scala, but it provides much of the same functionality. Currently, it supports extracting a maximum of 3 parameters, whereas Scala supports up to 22 in 2.10 and possibly unlimited in 2.11+? I’ve rarely found myself needing to extract more than 3 parameters in Scala, so I thought this would be an OK limitation for now. Support for additional parameters could be added in the future, but it will require writing additional code generation logic.</p>
+<p>Checkout the <a href="http://john.leacox.com/motif/">Github page</a> or <a href="https://github.com/johnlcox/motif" target="_blank" rel="external">Github repo</a> for additional details. Version 0.1 of motif is available from maven central. It is a little more verbose (horizontally) than Scala, but it provides much of the same functionality. Currently, it supports extracting a maximum of 3 parameters, whereas Scala supports up to 22 in 2.10 and possibly unlimited in 2.11+? I’ve rarely found myself needing to extract more than 3 parameters in Scala, so I thought this would be an OK limitation for now. Support for additional parameters could be added in the future, but it will require writing additional code generation logic.</p>
 <p>Motif provides many useful pattern matchers out of the box, but it is also very extensible. A Guava extension could be created, for instance, that provides matchers for Guava’s <code>Optional</code> and any other Guava concepts that would be useful to match on. The motif-generator project provides builders for generating matcher cases for extensions. <a href="https://github.com/johnlcox/motif/blob/master/generator/src/main/java/com/leacox/motif/cases/OptionalCasesGenerator.java" target="_blank" rel="external">OptionalCasesGenerator</a> is a good example for using the generator.</p>
 <p>The implementation of the Motif pattern matching happened in three phases. The initial phase was a varargs method that accepted the matching cases, and automatically executed the matching. This ran into ambiguity issues for consumers of the code, so I ended up scrapping it and converting to a fluent interface. By using a fluent interface, I could use intermediate classes to track types and avoid ambiguity. This second phase led to what is essentially the final API, except without nested extraction. Once I saw that the fluent interface was working well, I added nested extraction as a third phase. The nested extraction leads to a bit of combinatorial explosion of the API, so I added code generation during this phase to reduce the likelyhood of errors and to avoid writing very similar code multiple times. The code generation portion, is a separate library, and makes it easy for third party extensions to generate all of the necessary methods needed.</p>
 <p>Motif has been released as version 0.1 and is available in Maven central. The API is pretty solid, and I don’t expect any dramatic changes in the future. Give it a try in your Java 8 code. </p>
@@ -161,7 +161,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://john.leacox.com/2015/08/13/implementing-scala-like-pattern-matching-in-java-8/" data-id="ciqk8c6yq000gb8jxzxyyq6zk" class="article-share-link">Share</a>
+      <a data-url="http://john.leacox.com/2015/08/13/implementing-scala-like-pattern-matching-in-java-8/" data-id="ciqkuwsm6000eptjxj2cf3tnr" class="article-share-link">Share</a>
       
         <a href="http://john.leacox.com/2015/08/13/implementing-scala-like-pattern-matching-in-java-8/#disqus_thread" class="article-comment-link">Comments</a>
       
@@ -210,7 +210,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://john.leacox.com/2013/02/11/a-safer-way-to-create-java-subprocesses/" data-id="ciqk8c6ym000bb8jx4zn8h9y5" class="article-share-link">Share</a>
+      <a data-url="http://john.leacox.com/2013/02/11/a-safer-way-to-create-java-subprocesses/" data-id="ciqkuwsm2000aptjxntkyi3gr" class="article-share-link">Share</a>
       
         <a href="http://john.leacox.com/2013/02/11/a-safer-way-to-create-java-subprocesses/#disqus_thread" class="article-comment-link">Comments</a>
       
@@ -256,7 +256,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://john.leacox.com/2013/01/17/differentiate-java-processes-by-working-directory/" data-id="ciqk8c6yo000db8jxu6zy01ob" class="article-share-link">Share</a>
+      <a data-url="http://john.leacox.com/2013/01/17/differentiate-java-processes-by-working-directory/" data-id="ciqkuwsm4000bptjxpsu9si8d" class="article-share-link">Share</a>
       
         <a href="http://john.leacox.com/2013/01/17/differentiate-java-processes-by-working-directory/#disqus_thread" class="article-comment-link">Comments</a>
       
@@ -304,7 +304,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://john.leacox.com/2013/01/07/drumming-as-exercise-routine/" data-id="ciqk8c6yd0006b8jxek1winmm" class="article-share-link">Share</a>
+      <a data-url="http://john.leacox.com/2013/01/07/drumming-as-exercise-routine/" data-id="ciqkuwslg0001ptjxatic9w5e" class="article-share-link">Share</a>
       
         <a href="http://john.leacox.com/2013/01/07/drumming-as-exercise-routine/#disqus_thread" class="article-comment-link">Comments</a>
       
@@ -349,7 +349,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://john.leacox.com/2012/12/28/writing-a-good-linux-init-script/" data-id="ciqk8c6ya0004b8jx57ap8cwz" class="article-share-link">Share</a>
+      <a data-url="http://john.leacox.com/2012/12/28/writing-a-good-linux-init-script/" data-id="ciqkuwslb0000ptjxz0m4icmg" class="article-share-link">Share</a>
       
         <a href="http://john.leacox.com/2012/12/28/writing-a-good-linux-init-script/#disqus_thread" class="article-comment-link">Comments</a>
       
@@ -402,7 +402,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://john.leacox.com/2012/12/27/my-favorite-music-of-2012/" data-id="ciqk8c6y70003b8jxuvnwvswq" class="article-share-link">Share</a>
+      <a data-url="http://john.leacox.com/2012/12/27/my-favorite-music-of-2012/" data-id="ciqkuwslw0007ptjxr1jwe807" class="article-share-link">Share</a>
       
         <a href="http://john.leacox.com/2012/12/27/my-favorite-music-of-2012/#disqus_thread" class="article-comment-link">Comments</a>
       
@@ -444,7 +444,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://john.leacox.com/2012/12/14/blogging-is-hard/" data-id="ciqk8c6y20001b8jxz5jz192a" class="article-share-link">Share</a>
+      <a data-url="http://john.leacox.com/2012/12/14/blogging-is-hard/" data-id="ciqkuwslt0006ptjxssxsjex7" class="article-share-link">Share</a>
       
         <a href="http://john.leacox.com/2012/12/14/blogging-is-hard/#disqus_thread" class="article-comment-link">Comments</a>
       

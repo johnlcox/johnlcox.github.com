@@ -124,7 +124,7 @@ body,
 }
 body {
   background: #eee;
-  font: 14px -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
+  font: 16px Ubuntu, sans-serif;
   -webkit-text-size-adjust: 100%;
 }
 .outer {
@@ -309,7 +309,8 @@ body {
   font-weight: bold;
 }
 #header {
-  height: 300px;
+  background: #262a30;
+  height: 110px;
   position: relative;
   border-bottom: 1px solid #ddd;
 }
@@ -349,7 +350,7 @@ body {
   left: 0;
   width: 100%;
   height: 100%;
-  background: url("images/banner.jpg") center #000;
+  background: url("banner-url") center #000;
   -webkit-background-size: cover;
   -moz-background-size: cover;
   background-size: cover;
@@ -367,7 +368,7 @@ body {
 #subtitle {
   text-decoration: none;
   color: #fff;
-  font-weight: 300;
+  font-weight: 700;
   text-shadow: 0 1px 4px rgba(0,0,0,0.3);
 }
 #logo {
@@ -375,13 +376,16 @@ body {
   line-height: 40px;
   letter-spacing: 2px;
 }
+#logo-wrap {
+  margin-top: 12px;
+}
 #subtitle {
   font-size: 16px;
   line-height: 16px;
   letter-spacing: 1px;
 }
 #subtitle-wrap {
-  margin-top: 16px;
+  margin-top: 4px;
 }
 #main-nav {
   float: left;
@@ -391,7 +395,7 @@ body {
 .main-nav-link {
   float: left;
   color: #fff;
-  opacity: 0.6;
+  opacity: 0.8;
   text-decoration: none;
   text-shadow: 0 1px rgba(0,0,0,0.2);
   -webkit-transition: opacity 0.2s;
@@ -408,15 +412,15 @@ body {
 .nav-icon {
   font-family: FontAwesome;
   text-align: center;
-  font-size: 14px;
-  width: 14px;
-  height: 14px;
+  font-size: 16px;
+  width: 16px;
+  height: 16px;
   padding: 20px 15px;
   position: relative;
   cursor: pointer;
 }
 .main-nav-link {
-  font-weight: 300;
+  font-weight: 700;
   letter-spacing: 1px;
 }
 @media screen and (max-width: 479px) {
@@ -441,6 +445,18 @@ body {
 }
 #nav-rss-link:before {
   content: "\f09e";
+}
+#nav-twitter-link:before {
+  content: "\f099";
+}
+#nav-linkedin-link:before {
+  content: "\f0e1";
+}
+#nav-googleplus-link:before {
+  content: "\f0d5";
+}
+#nav-github-link:before {
+  content: "\f113";
 }
 #nav-search-btn:before {
   content: "\f002";
@@ -484,7 +500,7 @@ body {
   background: none;
   color: #555;
   width: 100%;
-  font: 13px -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
+  font: 13px Ubuntu, sans-serif;
   outline: none;
 }
 .search-form-input::-webkit-search-results-decoration,
@@ -507,7 +523,7 @@ body {
   color: #777;
 }
 .article {
-  margin: 50px 0;
+  margin: 24px 0;
 }
 .article-inner {
   overflow: hidden;
@@ -537,7 +553,7 @@ body {
   margin: 0 12px 1em;
 }
 .article-header {
-  padding: 20px 20px 0;
+  padding: 12px 12px 0;
 }
 .article-title {
   text-decoration: none;
@@ -555,7 +571,7 @@ a.article-title:hover {
 }
 .article-entry {
   color: #555;
-  padding: 0 20px;
+  padding: 0 12px;
 }
 .article-entry:before,
 .article-entry:after {
@@ -594,12 +610,6 @@ a.article-title:hover {
 .article-entry a:hover {
   text-decoration: underline;
 }
-.article-entry ul,
-.article-entry ol,
-.article-entry dl {
-  margin-top: 1.6em;
-  margin-bottom: 1.6em;
-}
 .article-entry img,
 .article-entry video {
   max-width: 100%;
@@ -625,15 +635,16 @@ a.article-title:hover {
   padding: 10px 0;
 }
 .article-entry blockquote {
-  font-family: Georgia, "Times New Roman", serif;
-  font-size: 1.4em;
+  font-family: Ubuntu, serif;
+  font-style: italic;
+  font-size: 0.96em;
   margin: 1.6em 20px;
   text-align: center;
 }
 .article-entry blockquote footer {
-  font-size: 14px;
+  font-size: 16px;
   margin: 1.6em 0;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
+  font-family: Ubuntu, sans-serif;
 }
 .article-entry blockquote footer cite:before {
   content: "—";
@@ -676,6 +687,34 @@ a.article-title:hover {
   height: 100%;
   margin-top: 0;
 }
+.article-entry .img-thumbnail {
+  max-width: 180px;
+  max-height: 64px;
+  display: block;
+  margin-left: 12px;
+  margin-top: 12px;
+  margin-bottom: 12px;
+  float: right;
+  clear: right;
+}
+.article-entry .img-code {
+  max-width: 640px;
+  max-height: 640px;
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+}
+.article-entry .img-topic {
+  max-width: 360px;
+  max-height: 1800px;
+  display: block;
+  margin-left: 12px;
+  margin-right: 12px;
+  margin-top: 12px;
+  margin-bottom: 12px;
+  float: right;
+  clear: right;
+}
 .article-more-link a {
   display: inline-block;
   line-height: 1em;
@@ -698,7 +737,7 @@ a.article-title:hover {
   line-height: 1.6em;
   border-top: 1px solid #ddd;
   padding-top: 1.6em;
-  margin: 0 20px 20px;
+  margin: 0 12px 12px;
 }
 .article-footer:before,
 .article-footer:after {
@@ -753,7 +792,7 @@ a.article-title:hover {
 }
 @media screen and (min-width: 768px) {
   #article-nav {
-    margin: 50px 0;
+    margin: 24px 0;
   }
   #article-nav:before {
     width: 8px;
@@ -778,7 +817,7 @@ a.article-title:hover {
   -webkit-box-sizing: border-box;
   -moz-box-sizing: border-box;
   box-sizing: border-box;
-  margin-top: 50px;
+  margin-top: 24px;
   text-align: center;
   display: block;
 }
@@ -841,7 +880,7 @@ a.article-title:hover {
   -webkit-box-sizing: border-box;
   -moz-box-sizing: border-box;
   box-sizing: border-box;
-  font: 14px -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
+  font: 14px Ubuntu, sans-serif;
   padding: 0 15px;
   color: #555;
   outline: none;
@@ -951,17 +990,17 @@ a.article-title:hover {
   background: #fff;
   -webkit-box-shadow: 1px 2px 3px #ddd;
   box-shadow: 1px 2px 3px #ddd;
-  padding: 20px;
+  padding: 12px;
   border: 1px solid #ddd;
   -webkit-border-radius: 3px;
   border-radius: 3px;
-  margin: 50px 0;
+  margin: 24px 0;
 }
 #comments a {
   color: #258fb8;
 }
 .archives-wrap {
-  margin: 50px 0;
+  margin: 24px 0;
 }
 .archives:before,
 .archives:after {
@@ -1028,7 +1067,7 @@ a.article-title:hover {
   display: block;
 }
 #page-nav {
-  margin: 50px auto;
+  margin: 24px auto;
   background: #fff;
   -webkit-box-shadow: 1px 2px 3px #ddd;
   box-shadow: 1px 2px 3px #ddd;
@@ -1050,8 +1089,6 @@ a.article-title:hover {
 #page-nav a,
 #page-nav span {
   padding: 10px 20px;
-  line-height: 1;
-  height: 2ex;
 }
 #page-nav a {
   color: #999;
@@ -1102,14 +1139,19 @@ a.article-title:hover {
 .article-entry pre,
 .article-entry .highlight {
   background: #2d2d2d;
-  margin: 0 -20px;
-  padding: 15px 20px;
+  margin: 0 -12px;
+  padding: 15px 12px;
   border-style: solid;
   border-color: #ddd;
   border-width: 1px 0;
   overflow: auto;
   color: #ccc;
-  line-height: 22.400000000000002px;
+  line-height: 25.6px;
+  -webkit-border-radius: 16px;
+  border-radius: 16px;
+  background: #333;
+  margin: 1px 10px 1px 10px;
+  border: 3px solid #eee;
 }
 .article-entry .highlight .gutter pre,
 .article-entry .gist .gist-file .gist-data .line-numbers {
@@ -1118,12 +1160,13 @@ a.article-title:hover {
 }
 .article-entry pre,
 .article-entry code {
-  font-family: "Source Code Pro", Consolas, Monaco, Menlo, Consolas, monospace;
+  font-family: "Ubuntu Mono", monospace;
+  font-weight: bold;
 }
 .article-entry code {
   background: #eee;
   text-shadow: 0 1px #fff;
-  padding: 0 0.3em;
+  padding: 0 0.5em;
 }
 .article-entry pre code {
   background: none;
@@ -1165,22 +1208,22 @@ a.article-title:hover {
   padding-right: 20px;
 }
 .article-entry .highlight .line {
-  height: 22.400000000000002px;
+  height: 25.6px;
 }
 .article-entry .highlight .line.marked {
   background: #515151;
 }
 .article-entry .gist {
-  margin: 0 -20px;
+  margin: 0 -12px;
   border-style: solid;
   border-color: #ddd;
   border-width: 1px 0;
   background: #2d2d2d;
-  padding: 15px 20px 15px 0;
+  padding: 15px 12px 15px 0;
 }
 .article-entry .gist .gist-file {
   border: none;
-  font-family: "Source Code Pro", Consolas, Monaco, Menlo, Consolas, monospace;
+  font-family: "Ubuntu Mono", monospace;
   margin: 0;
 }
 .article-entry .gist .gist-file .gist-data {
@@ -1203,11 +1246,11 @@ a.article-title:hover {
 .article-entry .gist .gist-file .gist-meta {
   background: #2d2d2d;
   color: #999;
-  font: 0.85em -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
+  font: 0.85em Ubuntu, sans-serif;
   text-shadow: 0 0;
   padding: 0;
   margin-top: 1em;
-  margin-left: 20px;
+  margin-left: 12px;
 }
 .article-entry .gist .gist-file .gist-meta a {
   color: #258fb8;
@@ -1279,7 +1322,7 @@ pre .javascript .function {
     left: 0;
     width: 280px;
     height: 100%;
-    background: #191919;
+    background: #1f0542;
     border-right: 1px solid #fff;
   }
 }
@@ -1304,7 +1347,7 @@ pre .javascript .function {
   }
 }
 .widget-wrap {
-  margin: 50px 0;
+  margin: 24px 0;
 }
 .widget {
   color: #777;
@@ -1379,5 +1422,4 @@ pre .javascript .function {
 }
 .tagcloud a {
   margin-right: 5px;
-  display: inline-block;
 }
