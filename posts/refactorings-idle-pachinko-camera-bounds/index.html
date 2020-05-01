@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta http-equiv="content-type" content="text/html; charset=utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="">
+  <meta name="generator" content="Hugo 0.61.0" />
+
+  <title>Refactorings: Idle Pachinko Camera Bounds &middot; Ideas on Software Engineering</title>
+
+    
+
+  
+  
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/pure/1.0.0/pure-min.css">
+
+  <!--[if lte IE 8]>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/pure/1.0.0/grids-responsive-old-ie-min.css">
+  <![endif]-->
+  <!--[if gt IE 8]><!-->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/pure/1.0.0/grids-responsive-min.css">
+  <!--<![endif]-->
+
+  <!--[if lte IE 8]>
+  <link rel="stylesheet" href="https://john.leacox.com/css/side-menu-old-ie.css">
+  <![endif]-->
+  <!--[if gt IE 8]><!-->
+  <link rel="stylesheet" href="https://john.leacox.com/css/side-menu.css">
+  <!--<![endif]-->
+
+  <link rel="stylesheet" href="https://john.leacox.com/css/blackburn.css">
+
+  
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.9.0/css/all.css">
+
+  
+  <link href="https://fonts.googleapis.com/css?family=Raleway" rel="stylesheet" type="text/css">
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+ 
+  
+
+  
+  <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.17.1/styles/solarized-dark.min.css">
+  <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.17.1/highlight.min.js"></script>
+  
+  <script>hljs.initHighlightingOnLoad();</script>
+  
+
+  <link rel="shortcut icon" href="https://john.leacox.com/img/favicon.ico" type="image/x-icon" />
+
+  
+    
+        <link rel="stylesheet" href="https://john.leacox.com/css/custom.css">
+    
+  
+    
+        <link rel="stylesheet" href="https://john.leacox.com/css/footnote.css">
+    
+  
+  
+
+</head>
+
+
+<body>
+<div id="layout">
+
+  
+<a href="#menu" id="menuLink" class="menu-link">
+  
+  <span></span>
+</a>
+<div id="menu">
+
+  
+  <a class="pure-menu-heading brand" href="https://john.leacox.com/"><img class="avatar" src="https://s.gravatar.com/avatar/c268064d396bb4bafd31090d029bd8df?s=80" alt="John Leacox" itemprop="image"></a>
+
+
+  <div class="pure-menu">
+    <ul class="pure-menu-list">
+      
+      
+        <li class="pure-menu-item">
+          <a class="pure-menu-link" href="https://john.leacox.com/"><i class='fa fa-home fa-fw'></i>Home</a>
+      
+        </li>
+      
+      
+        <li class="pure-menu-item">
+          <a class="pure-menu-link" href="https://john.leacox.com/post/"><i class='fa fa-list fa-fw'></i>Posts</a>
+      
+        </li>
+      
+    </ul>
+  </div>
+
+  <div class="pure-menu social">
+  <ul class="pure-menu-list">
+
+    
+    <li class="pure-menu-item">
+      <span class="pure-menu-span"><i class="fas fa-map-marker-alt fa-fw"></i>Kansas</span>
+    </li>
+    
+
+    
+
+    
+    <li class="pure-menu-item">
+      <a class="pure-menu-link" href="https://twitter.com/johnlcox" rel="me" target="_blank"><i class="fab fa-twitter-square fa-fw"></i>Twitter</a>
+    </li>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <li class="pure-menu-item">
+      <a class="pure-menu-link" href="https://github.com/johnlcox" rel="me" target="_blank"><i class="fab fa-github-square fa-fw"></i>GitHub</a>
+    </li>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <li class="pure-menu-item">
+      <a class="pure-menu-link" href="https://steamcommunity.com/id/johnlcox" rel="me" target="_blank"><i class="fab fa-steam-square fa-fw"></i>Steam</a>
+    </li>
+    
+
+    
+
+    
+
+    
+    <li class="pure-menu-item">
+      <a class="pure-menu-link" href="http://last.fm/user/johnlcox" rel="me" target="_blank"><i class="fab fa-lastfm-square fa-fw"></i>Last.fm</a>
+    </li>
+    
+
+    
+
+    
+
+    
+
+    
+
+  </ul>
+</div>
+
+
+  <div>
+  <div class="small-print">
+    <small>&copy; 2012 - 2020 John Leacox. All rights reserved.</small>
+  </div>
+  
+</div>
+
+</div>
+
+
+  <div id="main">
+
+
+<div class="header">
+  <h1>Refactorings: Idle Pachinko Camera Bounds</h1>
+  <h2></h2>
+</div>
+<div class="content">
+
+  <div class="post-meta">
+
+  <div>
+    <i class="fa fa-calendar fa-fw"></i>
+    Created: 
+    <time>30 Apr 2020</time>
+  </div>
+  
+
+  
+
+  
+
+  
+  
+  
+  <div>
+    <i class="fa fa-tags fa-fw"></i>
+    
+      <a class="post-taxonomy-tag" href="https://john.leacox.com/tags/gamedev">gamedev</a>&nbsp;&#47;
+    
+      <a class="post-taxonomy-tag" href="https://john.leacox.com/tags/unity2d">Unity2D</a>&nbsp;&#47;
+    
+      <a class="post-taxonomy-tag" href="https://john.leacox.com/tags/refactoring">refactoring</a>
+    
+  </div>
+  
+  
+
+</div>
+
+  <p>I recently implemented a feature to put bounds on camera movement for the Idle Pachinko game that Matt Torres and I have been developing. When I write code, I typically write it in multiple passes like how an author of a paper or a book takes multiple editing passes over their text. Below is the code for the camera bounds feature in multiple passes, showing how I improved the quality and understandability of the code before opening a pull request and calling it done.</p>
+<p>In this game the camera can only move up and down; it is locked to 0 on the x-axis. We have a top and a bottom boundary for the game area that we want to lock the camera to when scrolling/moving the camera up and down. The top and bottom boundary values are encapsulated by the <code>GameBoundaries</code> class which is used by this camera system to enforce the boundaries on the camera position.</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-csharp" data-lang="csharp"><span style="color:#66d9ef">using</span> EcsRx.Events;
+<span style="color:#66d9ef">using</span> EcsRx.Plugins.ReactiveSystems.Custom;
+<span style="color:#66d9ef">using</span> MisfitLabs.IdlePachinko.InGame.Events;
+<span style="color:#66d9ef">using</span> UnityEngine;
+
+<span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">CameraMovementSystem</span> : EventReactionSystem&lt;ScreenDraggedEvent&gt;
+{
+    <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">const</span> <span style="color:#66d9ef">float</span> DragSpeed = <span style="color:#ae81ff">1.5f</span>;
+
+    <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">readonly</span> Camera _camera;
+    <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">readonly</span> GameBoundaries _gameBoundaries;
+
+    <span style="color:#66d9ef">public</span> CameraMovementSystem(Camera camera, GameBoundaries gameBoundaries, IEventSystem eventSystem)
+        : <span style="color:#66d9ef">base</span>(eventSystem)
+    {
+        _camera = camera;
+        _gameBoundaries = gameBoundaries;
+    }
+
+    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> EventTriggered(ScreenDraggedEvent eventData)
+    {
+        <span style="color:#66d9ef">var</span> newPosition = _camera.transform.position + <span style="color:#66d9ef">new</span> Vector3(<span style="color:#ae81ff">0.0f</span>, -eventData.DeltaY * DragSpeed, <span style="color:#ae81ff">0.0f</span>);
+
+        <span style="color:#66d9ef">var</span> orthographicSize = _camera.orthographicSize;
+        <span style="color:#66d9ef">var</span> maxY = _gameBoundaries.Top - orthographicSize;
+        <span style="color:#66d9ef">var</span> minY = _gameBoundaries.Bottom + orthographicSize;
+        newPosition.y = Mathf.Clamp(newPosition.y, minY, maxY);
+
+        _camera.transform.position = newPosition;
+    }
+}
+</code></pre></div><p>While the above code works, there is a lot going on in the <code>EventTriggered</code> method. All the different calculations for moving the camera and locking it into the bounds happens here. Splitting some things out into private methods with good names will enhance the readability of this class.</p>
+<p>Since this was a new feature to the existing <code>CameraMovementSystem</code> that adding boundary enforcement, I first split out that enforcement into the method <code>ClampToGameBoundaries</code>. Now rather than needing to read the 4 lines that do the boundary enforcement and interpret what they are doing we can read the name of this function and it is immediately clear what it is doing. We can still jump into the new method to see how it is doing the enforcement. It is often good to separate the &ldquo;what&rdquo; from the &ldquo;how&rdquo;.</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-csharp" data-lang="csharp"><span style="color:#66d9ef">using</span> EcsRx.Events;
+<span style="color:#66d9ef">using</span> EcsRx.Plugins.ReactiveSystems.Custom;
+<span style="color:#66d9ef">using</span> MisfitLabs.IdlePachinko.InGame.Events;
+<span style="color:#66d9ef">using</span> UnityEngine;
+
+<span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">CameraMovementSystem</span> : EventReactionSystem&lt;ScreenDraggedEvent&gt;
+{
+    <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">const</span> <span style="color:#66d9ef">float</span> DragSpeed = <span style="color:#ae81ff">1.5f</span>;
+
+    <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">readonly</span> Camera _camera;
+    <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">readonly</span> GameBoundaries _gameBoundaries;
+
+    <span style="color:#66d9ef">public</span> CameraMovementSystem(Camera camera, GameBoundaries gameBoundaries, IEventSystem eventSystem)
+        : <span style="color:#66d9ef">base</span>(eventSystem)
+    {
+        _camera = camera;
+        _gameBoundaries = gameBoundaries;
+    }
+
+    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">override</span> <span style="color:#66d9ef">void</span> EventTriggered(ScreenDraggedEvent eventData)
+    {
+        <span style="color:#66d9ef">var</span> newPosition = _camera.transform.position + <span style="color:#66d9ef">new</span> Vector3(<span style="color:#ae81ff">0.0f</span>, -eventData.DeltaY * DragSpeed, <span style="color:#ae81ff">0.0f</span>);
+        _camera.transform.position = ClampToGameBoundaries(newPosition);;
+    }
+
+    <span style="color:#66d9ef">private</span> Vector3 ClampToGameBoundaries(Vector2 position)
+    {
+        <span style="color:#66d9ef">var</span> orthographicSize = _camera.orthographicSize;
+        <span style="color:#66d9ef">var</span> maxY = _gameBoundaries.Top - orthographicSize;
+        <span style="color:#66d9ef">var</span> minY = _gameBoundaries.Bottom + orthographicSize;
+        position.y = Mathf.Clamp(position.y, minY, maxY);
+        <span style="color:#66d9ef">return</span> position;
+    }
+}
+</code></pre></div><p>After the 2nd pass there are still a couple things that stick out to me. The first is the <code>orthagraphicSize</code> value. What is that? It is half the camera's height, which we need to enforce the boundary since the camera position is the center point, but we want to make sure the camera edge does not go passed the boundaries. I spent some time trying to name it better, but ultimately decided to leave it as is. The documentation from Unity3D &ndash; &ldquo;Camera's half-size when in orthographic mode.&rdquo; &ndash; is quite clear and sometimes it is best to stick with the naming of the libraries you are using.</p>
+<p>The second thing that sticks out to me is that there is still quite a bit of unnamed calculation happening in the <code>EventTriggered</code> method. To address this, I split out the camera new position dragging into a new method <code>CalculateNewPosition</code> and split it into 2 lines so that each step of the calculation is named &ndash; The move delta and then the new position.</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-csharp" data-lang="csharp"><span style="color:#66d9ef">using</span> EcsRx.Events;
+<span style="color:#66d9ef">using</span> EcsRx.Plugins.ReactiveSystems.Custom;
+<span style="color:#66d9ef">using</span> MisfitLabs.IdlePachinko.InGame.Events;
+<span style="color:#66d9ef">using</span> UnityEngine;
+
+<span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">CameraMovementSystem</span> : EventReactionSystem&lt;ScreenDraggedEvent&gt;
+{
+    <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">const</span> <span style="color:#66d9ef">float</span> DragSpeed = <span style="color:#ae81ff">1.5f</span>;
+
+    <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">readonly</span> Camera _camera;
+    <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">readonly</span> GameBoundaries _gameBoundaries;
+
+    <span style="color:#66d9ef">public</span> CameraMovementSystem(Camera camera, GameBoundaries gameBoundaries, IEventSystem eventSystem)
+        : <span style="color:#66d9ef">base</span>(eventSystem)
+    {
+        _camera = camera;
+        _gameBoundaries = gameBoundaries;
+    }
+
+    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">override</span> <span style="color:#66d9ef">void</span> EventTriggered(ScreenDraggedEvent eventData)
+    {
+        <span style="color:#66d9ef">var</span> newPosition = CalculateNewPosition(eventData);
+        _camera.transform.position = ClampToGameBoundaries(newPosition);
+    }
+
+    <span style="color:#66d9ef">private</span> Vector3 CalculateNewPosition(ScreenDraggedEvent eventData)
+    {
+        <span style="color:#66d9ef">var</span> moveDelta = <span style="color:#66d9ef">new</span> Vector3(<span style="color:#ae81ff">0.0f</span>, -eventData.DeltaY * DragSpeed, <span style="color:#ae81ff">0.0f</span>);
+        <span style="color:#66d9ef">return</span> _camera.transform.position + moveDelta;
+    }
+
+    <span style="color:#66d9ef">private</span> Vector3 ClampToGameBoundaries(Vector3 position)
+    {
+        <span style="color:#66d9ef">var</span> orthographicSize = _camera.orthographicSize;
+        <span style="color:#66d9ef">var</span> maxY = _gameBoundaries.Top - orthographicSize;
+        <span style="color:#66d9ef">var</span> minY = _gameBoundaries.Bottom + orthographicSize;
+        position.y = Mathf.Clamp(position.y, minY, maxY);
+        <span style="color:#66d9ef">return</span> position;
+    }
+}
+</code></pre></div>
+  
+  
+
+  
+<div class="prev-next-post pure-g">
+  <div class="pure-u-1-24" style="text-align: left;">
+    
+    <a href="https://john.leacox.com/posts/selective-setaccessible-permissions-using-byte-buddy-and-the-java-securitymanager/"><i class="fa fa-chevron-left"></i></a>
+    
+  </div>
+  <div class="pure-u-10-24">
+    
+    <nav class="prev">
+      <a href="https://john.leacox.com/posts/selective-setaccessible-permissions-using-byte-buddy-and-the-java-securitymanager/">Selective setAccessible permissions using Byte Buddy and the Java SecurityManager</a>
+    </nav>
+    
+  </div>
+  <div class="pure-u-2-24">
+    &nbsp;
+  </div>
+  <div class="pure-u-10-24">
+    
+  </div>
+  <div class="pure-u-1-24" style="text-align: right;">
+    
+  </div>
+</div>
+
+
+
+  
+
+</div>
+
+</div>
+</div>
+<script src="https://john.leacox.com/js/ui.js"></script>
+<script src="https://john.leacox.com/js/menus.js"></script>
+
+
+<script>
+  
+  if (window.location.hostname != "localhost") {
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+    ga('create', 'UA-36983897-3', 'auto');
+    ga('send', 'pageview');
+  }
+</script>
+
+
+
+
+
+
+<div class="bottom-panel" id="bottom-panel">
+    <div class="popup-wrapper" id="popup-wrapper"></div> 
+</div> 
+<script src="https://john.leacox.com/js/footnotes.js"></script>
+
+</body>
+</html>
+

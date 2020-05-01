@@ -6,14 +6,20 @@
 .content {
     font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
     color: #333;
+    max-width: 1000px;
 }
 
 code {
-    padding: 2px 4px;
     color:#d14;
     white-space: nowrap;
     background-color:#f7f7f9;
     border: 1px solid #e1e1e8;
+    font-size: 0.9em
+}
+
+
+.highlight pre {
+    padding: 2px 4px;
 }
 
 pre code {
@@ -26,7 +32,7 @@ pre code {
 
 .header {
     margin: 0 auto;
-    max-width: 800px;
+    max-width:1000px;
 }
 
 .pure-menu-span {

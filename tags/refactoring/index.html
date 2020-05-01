@@ -7,7 +7,7 @@
   <meta name="description" content="">
   <meta name="generator" content="Hugo 0.61.0" />
 
-  <title>Differentiate Java Processes by Working Directory &middot; Ideas on Software Engineering</title>
+  <title>refactoring &middot; Ideas on Software Engineering</title>
 
     
 
@@ -41,6 +41,9 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
 
  
+  
+  <link rel="alternate" type="application/rss+xml" title="Ideas on Software Engineering"
+    href='https://john.leacox.com/tags/refactoring/index.xml' />
   
 
   
@@ -215,17 +218,21 @@
 
 
 <div class="header">
-  <h1>Differentiate Java Processes by Working Directory</h1>
-  <h2></h2>
+  <h1>refactoring</h1>
 </div>
-<div class="content">
 
-  <div class="post-meta">
+<div class="content">
+  
+    <article>
+  <header>
+    <h2><a href="https://john.leacox.com/posts/refactorings-idle-pachinko-camera-bounds/">Refactorings: Idle Pachinko Camera Bounds</a></h2>
+
+    <div class="post-meta">
 
   <div>
     <i class="fa fa-calendar fa-fw"></i>
     Created: 
-    <time>17 Feb 2013</time>
+    <time>30 Apr 2020</time>
   </div>
   
 
@@ -239,13 +246,11 @@
   <div>
     <i class="fa fa-tags fa-fw"></i>
     
-      <a class="post-taxonomy-tag" href="https://john.leacox.com/tags/java">java</a>&nbsp;&#47;
+      <a class="post-taxonomy-tag" href="https://john.leacox.com/tags/gamedev">gamedev</a>&nbsp;&#47;
     
-      <a class="post-taxonomy-tag" href="https://john.leacox.com/tags/linux">linux</a>&nbsp;&#47;
+      <a class="post-taxonomy-tag" href="https://john.leacox.com/tags/unity2d">Unity2D</a>&nbsp;&#47;
     
-      <a class="post-taxonomy-tag" href="https://john.leacox.com/tags/shell">shell</a>&nbsp;&#47;
-    
-      <a class="post-taxonomy-tag" href="https://john.leacox.com/tags/stackify">stackify</a>
+      <a class="post-taxonomy-tag" href="https://john.leacox.com/tags/refactoring">refactoring</a>
     
   </div>
   
@@ -253,51 +258,20 @@
 
 </div>
 
-  <p>A lot of server software runs on Java, but the different Java processes are listed as simply <code>Java</code> via commands like <code>top</code> or <code>ps -ef</code>. One feature of the <a href="http://www.stackify.com">Stackify</a> agent is tracking the running processes on a server. I needed a way to identify what each Java process really was in a fairly simple and concise way, but there isn’t a clear winner in the output of the top or ps commands.</p>
-<p>Running <code>ps -ef | grep java</code> will output something nasty, similar to what follows. You can likely figure out what the Java process is actually running from the args — the example below obviously being tomcat — however, it’s not the most readable and doesn’t give a clear and concise value to display to a user in the Stackify web site. The user of the process below also indicates that it is running tomcat, but that won’t be the case for all Java processes.</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-text" data-lang="text">tomcat7 41298 1 5 18:05 ? 00:00:03 /usr/lib/jvm/default-java/bin/java -Djava.util.logging.config.file=/var/lib/tomcat7/conf/logging.properties -Djava.awt.headless=true -Xmx128m -XX:+UseConcMarkSweepGC -Djava.util.logging.manager=org.apache.juli.ClassLoaderLogManager -Djava.endorsed.dirs=/usr/share/tomcat7/endorsed -classpath /usr/share/tomcat7/bin/bootstrap.jar:/usr/share/tomcat7/bin/tomcat-juli.jar -Dcatalina.base=/var/lib/tomcat7 -Dcatalina.home=/usr/share/tomcat7 -Djava.io.tmpdir=/tmp/tomcat7-tomcat7-tmp org.apache.catalina.startup.Bootstrap start
-</code></pre></div><p>I decided it might work to differentiate the Java processes by working directory, but I wasn’t sure if there was a good way to find the working directory. Through some Google searches I discovered the <code>pwdx</code> command. The <code>pwdx</code> command takes a list of pids as parameters and outputs a row with the pid and the working directory for each pid. The working directory doesn’t work for all situations, but I’ve found it generally gives a concise way of determining what a Java process is actually running. I’m certainly open to suggestions if anyone has a better idea.</p>
-<p>Running the pwdx command for the output above — <code>sudo pwdx 41298</code> — leads to the following output. By combining this with the process name I can give the Java processes a more informative name when displayed in the Stackify website. This Java process would be displayed as <code>Java (/var/lib/tomcat7)</code>.</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-text" data-lang="text">41298: /var/lib/tomcat7
-</code></pre></div>
-  
-  
+  </header>
+
+  <p>
+  I recently implemented a feature to put bounds on camera movement for the Idle Pachinko game that Matt Torres and I have been developing. When I write code, I typically write it in multiple passes like how an author of a paper or a book takes multiple editing passes over their text. Below is the code for the camera bounds feature in multiple passes, showing how I improved the quality and understandability of the code before opening a pull request and calling it done.
+  </p>
 
   
-<div class="prev-next-post pure-g">
-  <div class="pure-u-1-24" style="text-align: left;">
-    
-    <a href="https://john.leacox.com/posts/a-safer-way-to-create-java-subprocesses/"><i class="fa fa-chevron-left"></i></a>
-    
-  </div>
-  <div class="pure-u-10-24">
-    
-    <nav class="prev">
-      <a href="https://john.leacox.com/posts/a-safer-way-to-create-java-subprocesses/">A Safer Way To Create Java Subprocesses</a>
-    </nav>
-    
-  </div>
-  <div class="pure-u-2-24">
-    &nbsp;
-  </div>
-  <div class="pure-u-10-24">
-    
-    <nav class="next">
-      <a href="https://john.leacox.com/posts/implementing-scala-like-pattern-matching-in-java-8/">Implementing Scala-like Pattern Matching in Java 8</a>
-    </nav>
-    
-  </div>
-  <div class="pure-u-1-24" style="text-align: right;">
-    
-    <a href="https://john.leacox.com/posts/implementing-scala-like-pattern-matching-in-java-8/"><i class="fa fa-chevron-right"></i></a>
-    
-  </div>
-</div>
-
-
+  <footer>
+    <a href="https://john.leacox.com/posts/refactorings-idle-pachinko-camera-bounds/">Read more<i class="fa fa-angle-double-right fa-fw"></i></a>
+  </footer>
+  
+</article>
 
   
-
 </div>
 
 </div>
@@ -331,4 +305,3 @@
 
 </body>
 </html>
-
