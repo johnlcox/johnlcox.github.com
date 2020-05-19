@@ -47,3 +47,8 @@ pre code {
     border: none;
     padding: 0.6em;
 }
+
+.content-centered {
+    margin: 0 auto;
+    width: max-content;
+}
