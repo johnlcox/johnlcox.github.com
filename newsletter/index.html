@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta http-equiv="content-type" content="text/html; charset=utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="">
+  <meta name="generator" content="Hugo 0.61.0" />
+
+  <title>Newsletter &middot; Ideas on Software Engineering</title>
+
+    
+
+  
+  
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/pure/1.0.0/pure-min.css">
+
+  <!--[if lte IE 8]>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/pure/1.0.0/grids-responsive-old-ie-min.css">
+  <![endif]-->
+  <!--[if gt IE 8]><!-->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/pure/1.0.0/grids-responsive-min.css">
+  <!--<![endif]-->
+
+  <!--[if lte IE 8]>
+  <link rel="stylesheet" href="https://john.leacox.com/css/side-menu-old-ie.css">
+  <![endif]-->
+  <!--[if gt IE 8]><!-->
+  <link rel="stylesheet" href="https://john.leacox.com/css/side-menu.css">
+  <!--<![endif]-->
+
+  <link rel="stylesheet" href="https://john.leacox.com/css/blackburn.css">
+
+  
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.9.0/css/all.css">
+
+  
+  <link href="https://fonts.googleapis.com/css?family=Raleway" rel="stylesheet" type="text/css">
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+ 
+  
+
+  
+  <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.17.1/styles/solarized-dark.min.css">
+  <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.17.1/highlight.min.js"></script>
+  
+  <script>hljs.initHighlightingOnLoad();</script>
+  
+
+  <link rel="shortcut icon" href="https://john.leacox.com/img/favicon.ico" type="image/x-icon" />
+
+  
+    
+        <link rel="stylesheet" href="https://john.leacox.com/css/custom.css">
+    
+  
+    
+        <link rel="stylesheet" href="https://john.leacox.com/css/footnote.css">
+    
+  
+  
+
+</head>
+
+
+<body>
+<div id="layout">
+
+  
+<a href="#menu" id="menuLink" class="menu-link">
+  
+  <span></span>
+</a>
+<div id="menu">
+
+  
+  <a class="pure-menu-heading brand" href="https://john.leacox.com/"><img class="avatar" src="https://s.gravatar.com/avatar/c268064d396bb4bafd31090d029bd8df?s=80" alt="John Leacox" itemprop="image"></a>
+
+
+  <div class="pure-menu">
+    <ul class="pure-menu-list">
+      
+      
+        <li class="pure-menu-item">
+          <a class="pure-menu-link" href="https://john.leacox.com/"><i class='fa fa-home fa-fw'></i>Home</a>
+      
+        </li>
+      
+      
+        <li class="pure-menu-item">
+          <a class="pure-menu-link" href="https://john.leacox.com/post/"><i class='fa fa-list fa-fw'></i>Posts</a>
+      
+        </li>
+      
+      
+        <li class="pure-menu-item">
+          <a class="pure-menu-link" href="https://john.leacox.com/tweetstorms/"><i class='fab fa-twitter fa-fw'></i>Tweetstorms</a>
+      
+        </li>
+      
+      
+        <li class="pure-menu-item">
+          <a class="pure-menu-link" href="https://john.leacox.com/now/"><i class='fa fa-hourglass-start fa-fw'></i>Now</a>
+      
+        </li>
+      
+      
+        <li class="pure-menu-item">
+          <a class="pure-menu-link" href="https://john.leacox.com/newsletter/"><i class='fa fa-envelope fa-fw'></i>Newsletter</a>
+      
+        </li>
+      
+      
+        <li class="pure-menu-item">
+          <a class="pure-menu-link" href="https://john.leacox.com/archive/"><i class='fa fa-archive fa-fw'></i>Archive</a>
+      
+        </li>
+      
+    </ul>
+  </div>
+
+  <div class="pure-menu social">
+  <ul class="pure-menu-list">
+
+    
+    <li class="pure-menu-item">
+      <span class="pure-menu-span"><i class="fas fa-map-marker-alt fa-fw"></i>Kansas</span>
+    </li>
+    
+
+    
+
+    
+    <li class="pure-menu-item">
+      <a class="pure-menu-link" href="https://twitter.com/johnlcox" rel="me" target="_blank"><i class="fab fa-twitter-square fa-fw"></i>Twitter</a>
+    </li>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <li class="pure-menu-item">
+      <a class="pure-menu-link" href="https://github.com/johnlcox" rel="me" target="_blank"><i class="fab fa-github-square fa-fw"></i>GitHub</a>
+    </li>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <li class="pure-menu-item">
+      <a class="pure-menu-link" href="https://linkedin.com/in/johnlcox" rel="me" target="_blank"><i class="fab fa-linkedin fa-fw"></i></i>LinkedIn</a>
+    </li>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <li class="pure-menu-item">
+      <a class="pure-menu-link" href="https://steamcommunity.com/id/johnlcox" rel="me" target="_blank"><i class="fab fa-steam-square fa-fw"></i>Steam</a>
+    </li>
+    
+
+    
+
+    
+
+    
+    <li class="pure-menu-item">
+      <a class="pure-menu-link" href="http://last.fm/user/johnlcox" rel="me" target="_blank"><i class="fab fa-lastfm-square fa-fw"></i>Last.fm</a>
+    </li>
+    
+
+    
+
+    
+
+    
+
+    
+
+  </ul>
+</div>
+
+
+  <div>
+  <div class="small-print">
+    <small>&copy; 2012 - 2020 John Leacox. All rights reserved.</small>
+  </div>
+  
+</div>
+
+</div>
+
+
+  <div id="main">
+
+
+<div class="header">
+  <h1>Newsletter</h1>
+  <h2></h2>
+</div>
+<div class="content">
+  
+<div class="content-centered">
+  <script src="https://f.convertkit.com/ckjs/ck.5.js"></script>
+  <form action="https://app.convertkit.com/forms/1403314/subscriptions" style="background-color: rgb(249, 250, 251); border-radius: 4px;" class="seva-form formkit-form" method="post" data-sv-form="1403314" data-uid="faaac5ddab" data-format="inline" data-version="5" data-options="{&quot;settings&quot;:{&quot;after_subscribe&quot;:{&quot;action&quot;:&quot;message&quot;,&quot;success_message&quot;:&quot;Success! Now check your email to confirm your subscription.&quot;,&quot;redirect_url&quot;:&quot;&quot;},&quot;analytics&quot;:{&quot;google&quot;:null,&quot;facebook&quot;:null,&quot;segment&quot;:null,&quot;pinterest&quot;:null},&quot;modal&quot;:{&quot;trigger&quot;:&quot;timer&quot;,&quot;scroll_percentage&quot;:null,&quot;timer&quot;:5,&quot;devices&quot;:&quot;all&quot;,&quot;show_once_every&quot;:15},&quot;powered_by&quot;:{&quot;show&quot;:true,&quot;url&quot;:&quot;https://convertkit.com?utm_source=dynamic&amp;utm_medium=referral&amp;utm_campaign=poweredby&amp;utm_content=form&quot;},&quot;recaptcha&quot;:{&quot;enabled&quot;:true},&quot;return_visitor&quot;:{&quot;action&quot;:&quot;show&quot;,&quot;custom_content&quot;:&quot;&quot;},&quot;slide_in&quot;:{&quot;display_in&quot;:&quot;bottom_right&quot;,&quot;trigger&quot;:&quot;timer&quot;,&quot;scroll_percentage&quot;:null,&quot;timer&quot;:5,&quot;devices&quot;:&quot;all&quot;,&quot;show_once_every&quot;:15},&quot;sticky_bar&quot;:{&quot;display_in&quot;:&quot;top&quot;,&quot;trigger&quot;:&quot;timer&quot;,&quot;scroll_percentage&quot;:null,&quot;timer&quot;:5,&quot;devices&quot;:&quot;all&quot;,&quot;show_once_every&quot;:15}},&quot;version&quot;:&quot;5&quot;}" min-width="400 500 600 700 800"><div style="opacity: 0.2;" class="formkit-background"></div><div data-style="minimal"><div class="formkit-header" style="color: rgb(77, 77, 77); font-size: 27px; font-weight: 700;" data-element="header"><h1>Join the Newsletter</h1></div><div class="formkit-subheader" style="color: rgb(104, 104, 104); font-size: 18px;" data-element="subheader"><p>Subscribe to get updates on new blog posts and other content.</p></div><ul class="formkit-alert formkit-alert-error" data-element="errors" data-group="alert"></ul><div data-element="fields" data-stacked="false" class="seva-fields formkit-fields"><div class="formkit-field"><input class="formkit-input" name="email_address" style="color: rgb(0, 0, 0); border-color: rgb(227, 227, 227); border-radius: 4px; font-weight: 400;" placeholder="Your email address" required="" type="email"></div><button data-element="submit" class="formkit-submit formkit-submit" style="color: rgb(255, 255, 255); background-color: rgb(22, 119, 190); border-radius: 4px; font-weight: 400;"><div class="formkit-spinner"><div></div><div></div><div></div></div><span>Subscribe</span></button></div><div class="formkit-guarantee" style="color: rgb(77, 77, 77); font-size: 13px; font-weight: 400;" data-element="guarantee">We won't send you spam. Unsubscribe at any time.</div><a href="https://convertkit.com?utm_source=dynamic&amp;utm_medium=referral&amp;utm_campaign=poweredby&amp;utm_content=form" class="formkit-powered-by" data-element="powered-by" target="_blank" rel="noopener noreferrer">Powered By ConvertKit</a></div><style>.formkit-form[data-uid="faaac5ddab"] *{box-sizing:border-box;}.formkit-form[data-uid="faaac5ddab"]{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;}.formkit-form[data-uid="faaac5ddab"] legend{border:none;font-size:inherit;margin-bottom:10px;padding:0;position:relative;display:table;}.formkit-form[data-uid="faaac5ddab"] fieldset{border:0;padding:0.01em 0 0 0;margin:0;min-width:0;}.formkit-form[data-uid="faaac5ddab"] body:not(:-moz-handler-blocked) fieldset{display:table-cell;}.formkit-form[data-uid="faaac5ddab"] h1,.formkit-form[data-uid="faaac5ddab"] h2,.formkit-form[data-uid="faaac5ddab"] h3,.formkit-form[data-uid="faaac5ddab"] h4,.formkit-form[data-uid="faaac5ddab"] h5,.formkit-form[data-uid="faaac5ddab"] h6{color:inherit;font-size:inherit;font-weight:inherit;}.formkit-form[data-uid="faaac5ddab"] p{color:inherit;font-size:inherit;font-weight:inherit;}.formkit-form[data-uid="faaac5ddab"] ol:not([template-default]),.formkit-form[data-uid="faaac5ddab"] ul:not([template-default]),.formkit-form[data-uid="faaac5ddab"] blockquote:not([template-default]){text-align:left;}.formkit-form[data-uid="faaac5ddab"] p:not([template-default]),.formkit-form[data-uid="faaac5ddab"] hr:not([template-default]),.formkit-form[data-uid="faaac5ddab"] blockquote:not([template-default]),.formkit-form[data-uid="faaac5ddab"] ol:not([template-default]),.formkit-form[data-uid="faaac5ddab"] ul:not([template-default]){color:inherit;font-style:initial;}.formkit-form[data-uid="faaac5ddab"][data-format="modal"]{display:none;}.formkit-form[data-uid="faaac5ddab"][data-format="slide in"]{display:none;}.formkit-form[data-uid="faaac5ddab"][data-format="sticky bar"]{display:none;}.formkit-sticky-bar .formkit-form[data-uid="faaac5ddab"][data-format="sticky bar"]{display:block;}.formkit-form[data-uid="faaac5ddab"] .formkit-input,.formkit-form[data-uid="faaac5ddab"] .formkit-select,.formkit-form[data-uid="faaac5ddab"] .formkit-checkboxes{width:100%;}.formkit-form[data-uid="faaac5ddab"] .formkit-button,.formkit-form[data-uid="faaac5ddab"] .formkit-submit{border:0;border-radius:5px;color:#ffffff;cursor:pointer;display:inline-block;text-align:center;font-size:15px;font-weight:500;cursor:pointer;margin-bottom:15px;overflow:hidden;padding:0;position:relative;vertical-align:middle;}.formkit-form[data-uid="faaac5ddab"] .formkit-button:hover,.formkit-form[data-uid="faaac5ddab"] .formkit-submit:hover,.formkit-form[data-uid="faaac5ddab"] .formkit-button:focus,.formkit-form[data-uid="faaac5ddab"] .formkit-submit:focus{outline:none;}.formkit-form[data-uid="faaac5ddab"] .formkit-button:hover > span,.formkit-form[data-uid="faaac5ddab"] .formkit-submit:hover > span,.formkit-form[data-uid="faaac5ddab"] .formkit-button:focus > span,.formkit-form[data-uid="faaac5ddab"] .formkit-submit:focus > span{background-color:rgba(0,0,0,0.1);}.formkit-form[data-uid="faaac5ddab"] .formkit-button > span,.formkit-form[data-uid="faaac5ddab"] .formkit-submit > span{display:block;-webkit-transition:all 300ms ease-in-out;transition:all 300ms ease-in-out;padding:12px 24px;}.formkit-form[data-uid="faaac5ddab"] .formkit-input{background:#ffffff;font-size:15px;padding:12px;border:1px solid #e3e3e3;-webkit-flex:1 0 auto;-ms-flex:1 0 auto;flex:1 0 auto;line-height:1.4;margin:0;-webkit-transition:border-color ease-out 300ms;transition:border-color ease-out 300ms;}.formkit-form[data-uid="faaac5ddab"] .formkit-input:focus{outline:none;border-color:#1677be;-webkit-transition:border-color ease 300ms;transition:border-color ease 300ms;}.formkit-form[data-uid="faaac5ddab"] .formkit-input::-webkit-input-placeholder{color:inherit;opacity:0.8;}.formkit-form[data-uid="faaac5ddab"] .formkit-input::-moz-placeholder{color:inherit;opacity:0.8;}.formkit-form[data-uid="faaac5ddab"] .formkit-input:-ms-input-placeholder{color:inherit;opacity:0.8;}.formkit-form[data-uid="faaac5ddab"] .formkit-input::placeholder{color:inherit;opacity:0.8;}.formkit-form[data-uid="faaac5ddab"] [data-group="dropdown"]{position:relative;display:inline-block;width:100%;}.formkit-form[data-uid="faaac5ddab"] [data-group="dropdown"]::before{content:"";top:calc(50% - 2.5px);right:10px;position:absolute;pointer-events:none;border-color:#4f4f4f transparent transparent transparent;border-style:solid;border-width:6px 6px 0 6px;height:0;width:0;z-index:999;}.formkit-form[data-uid="faaac5ddab"] [data-group="dropdown"] select{height:auto;width:100%;cursor:pointer;color:#333333;line-height:1.4;margin-bottom:0;padding:0 6px;-webkit-appearance:none;-moz-appearance:none;appearance:none;font-size:15px;padding:12px;padding-right:25px;border:1px solid #e3e3e3;background:#ffffff;}.formkit-form[data-uid="faaac5ddab"] [data-group="dropdown"] select:focus{outline:none;}.formkit-form[data-uid="faaac5ddab"] [data-group="checkboxes"]{text-align:left;margin:0;}.formkit-form[data-uid="faaac5ddab"] [data-group="checkboxes"] [data-group="checkbox"]{margin-bottom:10px;}.formkit-form[data-uid="faaac5ddab"] [data-group="checkboxes"] [data-group="checkbox"] *{cursor:pointer;}.formkit-form[data-uid="faaac5ddab"] [data-group="checkboxes"] [data-group="checkbox"]:last-of-type{margin-bottom:0;}.formkit-form[data-uid="faaac5ddab"] [data-group="checkboxes"] [data-group="checkbox"] input[type="checkbox"]{display:none;}.formkit-form[data-uid="faaac5ddab"] [data-group="checkboxes"] [data-group="checkbox"] input[type="checkbox"] + label::after{content:none;}.formkit-form[data-uid="faaac5ddab"] [data-group="checkboxes"] [data-group="checkbox"] input[type="checkbox"]:checked + label::after{border-color:#ffffff;content:"";}.formkit-form[data-uid="faaac5ddab"] [data-group="checkboxes"] [data-group="checkbox"] input[type="checkbox"]:checked + label::before{background:#10bf7a;border-color:#10bf7a;}.formkit-form[data-uid="faaac5ddab"] [data-group="checkboxes"] [data-group="checkbox"] label{position:relative;display:inline-block;padding-left:28px;}.formkit-form[data-uid="faaac5ddab"] [data-group="checkboxes"] [data-group="checkbox"] label::before,.formkit-form[data-uid="faaac5ddab"] [data-group="checkboxes"] [data-group="checkbox"] label::after{position:absolute;content:"";display:inline-block;}.formkit-form[data-uid="faaac5ddab"] [data-group="checkboxes"] [data-group="checkbox"] label::before{height:16px;width:16px;border:1px solid #e3e3e3;background:#ffffff;left:0px;top:3px;}.formkit-form[data-uid="faaac5ddab"] [data-group="checkboxes"] [data-group="checkbox"] label::after{height:4px;width:8px;border-left:2px solid #4d4d4d;border-bottom:2px solid #4d4d4d;-webkit-transform:rotate(-45deg);-ms-transform:rotate(-45deg);transform:rotate(-45deg);left:4px;top:8px;}.formkit-form[data-uid="faaac5ddab"] .formkit-alert{background:#f9fafb;border:1px solid #e3e3e3;border-radius:5px;-webkit-flex:1 0 auto;-ms-flex:1 0 auto;flex:1 0 auto;list-style:none;margin:25px auto;padding:12px;text-align:center;width:100%;}.formkit-form[data-uid="faaac5ddab"] .formkit-alert:empty{display:none;}.formkit-form[data-uid="faaac5ddab"] .formkit-alert-success{background:#d3fbeb;border-color:#10bf7a;color:#0c905c;}.formkit-form[data-uid="faaac5ddab"] .formkit-alert-error{background:#fde8e2;border-color:#f2643b;color:#ea4110;}.formkit-form[data-uid="faaac5ddab"] .formkit-spinner{display:-webkit-box;display:-webkit-flex;display:-ms-flexbox;display:flex;height:0px;width:0px;margin:0 auto;position:absolute;top:0;left:0;right:0;width:0px;overflow:hidden;text-align:center;-webkit-transition:all 300ms ease-in-out;transition:all 300ms ease-in-out;}.formkit-form[data-uid="faaac5ddab"] .formkit-spinner > div{margin:auto;width:12px;height:12px;background-color:#fff;opacity:0.3;border-radius:100%;display:inline-block;-webkit-animation:formkit-bouncedelay-formkit-form-data-uid-faaac5ddab- 1.4s infinite ease-in-out both;animation:formkit-bouncedelay-formkit-form-data-uid-faaac5ddab- 1.4s infinite ease-in-out both;}.formkit-form[data-uid="faaac5ddab"] .formkit-spinner > div:nth-child(1){-webkit-animation-delay:-0.32s;animation-delay:-0.32s;}.formkit-form[data-uid="faaac5ddab"] .formkit-spinner > div:nth-child(2){-webkit-animation-delay:-0.16s;animation-delay:-0.16s;}.formkit-form[data-uid="faaac5ddab"] .formkit-submit[data-active] .formkit-spinner{opacity:1;height:100%;width:50px;}.formkit-form[data-uid="faaac5ddab"] .formkit-submit[data-active] .formkit-spinner ~ span{opacity:0;}.formkit-form[data-uid="faaac5ddab"] .formkit-powered-by[data-active="false"]{opacity:0.35;}@-webkit-keyframes formkit-bouncedelay-formkit-form-data-uid-faaac5ddab-{0%,80%,100%{-webkit-transform:scale(0);-ms-transform:scale(0);transform:scale(0);}40%{-webkit-transform:scale(1);-ms-transform:scale(1);transform:scale(1);}}@keyframes formkit-bouncedelay-formkit-form-data-uid-faaac5ddab-{0%,80%,100%{-webkit-transform:scale(0);-ms-transform:scale(0);transform:scale(0);}40%{-webkit-transform:scale(1);-ms-transform:scale(1);transform:scale(1);}}.formkit-form[data-uid="faaac5ddab"] blockquote{padding:10px 20px;margin:0 0 20px;border-left:5px solid #e1e1e1;} .formkit-form[data-uid="faaac5ddab"]{border:1px solid #e3e3e3;max-width:700px;position:relative;overflow:hidden;}.formkit-form[data-uid="faaac5ddab"] .formkit-background{width:100%;height:100%;position:absolute;top:0;left:0;background-size:cover;background-position:center;opacity:0.3;z-index:1;}.formkit-form[data-uid="faaac5ddab"] [data-style="minimal"]{padding:20px;width:100%;z-index:2;position:relative;}.formkit-form[data-uid="faaac5ddab"] .formkit-header{margin:0 0 27px 0;text-align:center;}.formkit-form[data-uid="faaac5ddab"] .formkit-subheader{margin:18px 0;text-align:center;}.formkit-form[data-uid="faaac5ddab"] .formkit-guarantee{font-size:13px;margin:10px 0 15px 0;text-align:center;}.formkit-form[data-uid="faaac5ddab"] .formkit-guarantee > p{margin:0;}.formkit-form[data-uid="faaac5ddab"] .formkit-powered-by{color:#7d7d7d;display:block;font-size:12px;margin:10px 0 0 0;text-align:center;}.formkit-form[data-uid="faaac5ddab"] .formkit-fields{display:-webkit-box;display:-webkit-flex;display:-ms-flexbox;display:flex;-webkit-flex-wrap:wrap;-ms-flex-wrap:wrap;flex-wrap:wrap;margin:25px auto 0 auto;}.formkit-form[data-uid="faaac5ddab"] .formkit-field{min-width:220px;}.formkit-form[data-uid="faaac5ddab"] .formkit-field,.formkit-form[data-uid="faaac5ddab"] .formkit-submit{margin:0 0 15px 0;-webkit-flex:1 0 100%;-ms-flex:1 0 100%;flex:1 0 100%;}.formkit-form[data-uid="faaac5ddab"][min-width~="600"] [data-style="minimal"]{padding:40px;}.formkit-form[data-uid="faaac5ddab"][min-width~="600"] .formkit-fields[data-stacked="false"]{margin-left:-5px;margin-right:-5px;}.formkit-form[data-uid="faaac5ddab"][min-width~="600"] .formkit-fields[data-stacked="false"] .formkit-field,.formkit-form[data-uid="faaac5ddab"][min-width~="600"] .formkit-fields[data-stacked="false"] .formkit-submit{margin:0 5px 15px 5px;}.formkit-form[data-uid="faaac5ddab"][min-width~="600"] .formkit-fields[data-stacked="false"] .formkit-field{-webkit-flex:100 1 auto;-ms-flex:100 1 auto;flex:100 1 auto;}.formkit-form[data-uid="faaac5ddab"][min-width~="600"] .formkit-fields[data-stacked="false"] .formkit-submit{-webkit-flex:1 1 auto;-ms-flex:1 1 auto;flex:1 1 auto;} </style></form>
+</div>
+</div>
+
+</div>
+</div>
+<script src="https://john.leacox.com/js/ui.js"></script>
+<script src="https://john.leacox.com/js/menus.js"></script>
+
+
+<script>
+  
+  if (window.location.hostname != "localhost") {
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+    ga('create', 'UA-36983897-3', 'auto');
+    ga('send', 'pageview');
+  }
+</script>
+
+
+
+
+
+
+<div class="bottom-panel" id="bottom-panel">
+    <div class="popup-wrapper" id="popup-wrapper"></div> 
+</div> 
+<script src="https://john.leacox.com/js/footnotes.js"></script>
+
+</body>
+</html>
+
