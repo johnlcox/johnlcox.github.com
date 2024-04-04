@@ -5,7 +5,7 @@
   <meta http-equiv="content-type" content="text/html; charset=utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description" content="">
-  <meta name="generator" content="Hugo 0.61.0" />
+  <meta name="generator" content="Hugo 0.124.1">
 
   <title>Tweetstorms &middot; Ideas on Software Engineering</title>
 
@@ -41,9 +41,6 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
 
  
-  
-  <link rel="alternate" type="application/rss+xml" title="Ideas on Software Engineering"
-    href='https://john.leacox.com/tweetstorms/index.xml' />
   
 
   
@@ -107,12 +104,6 @@
       
         <li class="pure-menu-item">
           <a class="pure-menu-link" href="https://john.leacox.com/now/"><i class='fa fa-hourglass-start fa-fw'></i>Now</a>
-      
-        </li>
-      
-      
-        <li class="pure-menu-item">
-          <a class="pure-menu-link" href="https://john.leacox.com/newsletter/"><i class='fa fa-envelope fa-fw'></i>Newsletter</a>
       
         </li>
       
@@ -277,11 +268,12 @@
 
     <div class="content content-centered"><blockquote class="twitter-tweet"><p lang="en" dir="ltr">A simple (but not easy) way to improve your code quality is to only call it done when you fully understand the code you have written; only merge it or open a pull request after you understand it.</p>&mdash; John Leacox (@johnlcox) <a href="https://twitter.com/johnlcox/status/1262435825461190656?ref_src=twsrc%5Etfw">May 18, 2020</a></blockquote>
 <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+
 </div>
     
     <p>A simple (but not easy) way to improve your code quality is to only call it done when you fully understand the code you have written; only merge it or open a pull request after you understand it.</p>
 <p>Simple because it does not require specific knowledge of broad programming principles and patterns or other technical jargon, but not easy because it requires effort on your part to learn or make additional changes to the code.</p>
-<p>Did you copy some code that works, but you don't know why? Are you changing an existing codebase? Take the time understand why it works. Maybe some parts can be changed or removed for your use case for more clarity or cleaner code.</p>
+<p>Did you copy some code that works, but you don&rsquo;t know why? Are you changing an existing codebase? Take the time understand why it works. Maybe some parts can be changed or removed for your use case for more clarity or cleaner code.</p>
 <p>Focusing on the parts of the code you do not understand creates a roadmap for your learning that can be applied immediately vs studying/learning broadly which provides value more over the long haul.</p>
 <p>Time-box your effort to understand the code, if it is going to take too much time, encapsulate the hard to understand parts into private functions/classes as much as possible. The complicated bits can be hidden from consumers of the code.</p>
 <p>I like to do a self-review of my code with a @github diff and make minor improvements before opening a pull request for review. This helps by zooming out to see the change as a whole and see what parts can be improved for understanding.</p>
@@ -315,6 +307,7 @@
 
     <div class="content content-centered"><blockquote class="twitter-tweet"><p lang="en" dir="ltr">Naming things well is more important than any programming principles. Good naming builds understanding due to the shared natural language, without requiring any special technical knowledge.</p>&mdash; John Leacox (@johnlcox) <a href="https://twitter.com/johnlcox/status/1258752039800246274?ref_src=twsrc%5Etfw">May 8, 2020</a></blockquote>
 <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+
 </div>
     
     <p>Naming things well is more important than any programming principles. Good naming builds understanding due to the shared natural language, without requiring any special technical knowledge.</p>
@@ -352,15 +345,16 @@
 
     <div class="content content-centered"><blockquote class="twitter-tweet"><p lang="en" dir="ltr">I really like the concept of coming to terms with an author as defined in the book How to Read a Book. In addition to books, this also applies to reading code, as in code reviews, refactoring or fixing code, and reading open source code.</p>&mdash; John Leacox (@johnlcox) <a href="https://twitter.com/johnlcox/status/1246554689895874562?ref_src=twsrc%5Etfw">April 4, 2020</a></blockquote>
 <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+
 </div>
     
     <p>I really like the concept of coming to terms with an author as defined in the book How to Read a Book. In addition to books, this also applies to reading code, as in code reviews, refactoring or fixing code, and reading open source code.</p>
 <p>You cannot truly understand a book or code until you have come to terms with the author. Words have ambiguous meanings, so you must identify the important words and also come to understand the meaning intended by the author.</p>
 <p>Its risky to fix a bug or refactor code if you have not yet come to terms with the code and its author. You are likely to create new bugs due to misunderstanding the code you are changing.</p>
-<p>With a book the author's intent is all that matters in coming to terms. The author may do a poor job at communicating their intent, but once you have come to terms you understand the information or knowledge they are conveying.</p>
-<p>With code, since a computer will interpret it exactly one way, there are two aspects in coming to terms with code. You must come to terms with the author's intent, and you must also come to terms with what the code actually does.</p>
+<p>With a book the author&rsquo;s intent is all that matters in coming to terms. The author may do a poor job at communicating their intent, but once you have come to terms you understand the information or knowledge they are conveying.</p>
+<p>With code, since a computer will interpret it exactly one way, there are two aspects in coming to terms with code. You must come to terms with the author&rsquo;s intent, and you must also come to terms with what the code actually does.</p>
 <p>It is possible that when executed by a computer, the code does something different than the author intended. The author of the code may have failed to come to terms with the language or library they are building their code upon.</p>
-<p>Even when the executed code and the author's intent match, you must come to terms with both prior to making any changes. There may be implicit assumptions in the author's intent that are only clear when you come to terms with both.</p>
+<p>Even when the executed code and the author&rsquo;s intent match, you must come to terms with both prior to making any changes. There may be implicit assumptions in the author&rsquo;s intent that are only clear when you come to terms with both.</p>
 <p>This is why naming is so important when writing code. Naming conveys intent, and makes it easier for future readers of the code (including your future self) to come to terms with the code and the intent.</p>
 <p>Understanding the domain of the code can help in coming to terms. This provides context and helps to narrow down the meaning of the terms being used within the code.</p>
 <p>If you are having trouble understanding a piece of code, search for the parts that you do understand. Use the parts that you do understand as context for the parts still to be interpreted.</p>

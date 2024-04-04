@@ -5,7 +5,7 @@
   <meta http-equiv="content-type" content="text/html; charset=utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description" content="">
-  <meta name="generator" content="Hugo 0.61.0" />
+  <meta name="generator" content="Hugo 0.124.1">
 
   <title>Selective setAccessible permissions using Byte Buddy and the Java SecurityManager &middot; Ideas on Software Engineering</title>
 
@@ -104,12 +104,6 @@
       
         <li class="pure-menu-item">
           <a class="pure-menu-link" href="https://john.leacox.com/now/"><i class='fa fa-hourglass-start fa-fw'></i>Now</a>
-      
-        </li>
-      
-      
-        <li class="pure-menu-item">
-          <a class="pure-menu-link" href="https://john.leacox.com/newsletter/"><i class='fa fa-envelope fa-fw'></i>Newsletter</a>
       
         </li>
       
@@ -280,138 +274,138 @@
   <p>The Java <code>SecurityManager</code> provides a lot of good permissions for restricted what untrusted code can access. The downside of the standard permissions is that many of them are too broad, making it hard to enable permissions around commonly used functionality without defeating the purpose of the restricted security. The permissions around reflections are one of these cases, where the permissions around the <code>setAccessible</code> reflections method is either all on or all off. It is possible to work around this default behavior, providing more selective fine-grained permissions, by using bytecode weaving. However, for any of this this to work the Java <code>SecurityManager</code> must be used along with loading the code that these permissions will be applied to from a separate jar, probably using a custom or at least isolated instance of a <code>URLClassLoader</code>. This is a prerequisite which has already been well documented by Will Sargent in his post <a href="https://tersesystems.com/2015/12/29/sandbox-experiment/">Self-Protecting Sandbox Using SecurityManager</a> as well as my own example sandbox runtime environment <a href="https://github.com/johnlcox/sandbox-runtime">sandbox-runtime</a>.</p>
 <p>The main permission in question around the <code>setAccessible</code> method is <code>ReflectPermission(&quot;suppressAccessChecks&quot;)</code>. When this permission is disabled it disallows changing the accessibility of fields, methods, and constructors. By default the <code>SecurityManager</code> is not enabled, which means all permission checks are disabled. Since this is the standard way Java is run, many common libraries, and even many alternative JVM language are dependent on being able to use reflection to access private fields and methods. If you do need to run code with a <code>SecurityManager</code>, then the <code>ReflectPermission(&quot;suppressAccessChecks&quot;)</code> permission defeats all security provided by the <code>SecurityManager</code>. Untrusted code can make use of <code>setAccessible</code> to work around and disable the <code>SecurityManager</code> entirely.</p>
 <p>It may appear that the only two choices are between having a secure environment and disallowing untrusted code from using libraries or languages that require reflection, or allowing such access by having an unsecure environment. However, there is an alternative if you are willing to put in the work. Libraries like <a href="https://github.com/raphw/byte-buddy">Byte Buddy</a> make it possible to replace methods of existing classes with new implementations, at runtime, through the use of a Java agent.</p>
-<p>I have implemented a custom, more fine-grained, permission around access to the <code>setAccessible</code> method. In my examples I have chosen to use the code source or the <code>ClassLoader</code> as the determining factor; code that attempts to call <code>setAccessible</code> will only be granted permission if both itself and the class it is attempting to change the accessibility of are from the same class loader. In other words, this reflections method can only be used on classes from the same jar as the untrusted code; it cannot be used to access private fields of standard Java classes. This is just what I chose, as it fit best for the security settings I'm targeting. The determining factor could be setup in many different ways, including a package or class whitelist or blacklist.</p>
+<p>I have implemented a custom, more fine-grained, permission around access to the <code>setAccessible</code> method. In my examples I have chosen to use the code source or the <code>ClassLoader</code> as the determining factor; code that attempts to call <code>setAccessible</code> will only be granted permission if both itself and the class it is attempting to change the accessibility of are from the same class loader. In other words, this reflections method can only be used on classes from the same jar as the untrusted code; it cannot be used to access private fields of standard Java classes. This is just what I chose, as it fit best for the security settings I&rsquo;m targeting. The determining factor could be setup in many different ways, including a package or class whitelist or blacklist.</p>
 <p>The first piece that is needed is the new custom <code>Permission</code>. This permission uses the class loader of the caller and callee to determine whether permissions should be granted or not.</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Java" data-lang="Java"><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">UserSetAccessiblePermission</span> <span style="color:#66d9ef">extends</span> Permission <span style="color:#f92672">{</span>
-  <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">final</span> ClassLoader loader<span style="color:#f92672">;</span>  
-
-  <span style="color:#66d9ef">public</span> <span style="color:#a6e22e">UserSetAccessiblePermission</span><span style="color:#f92672">(</span>ClassLoader loader<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
-    <span style="color:#66d9ef">super</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;userSetAccessible&#34;</span><span style="color:#f92672">)</span><span style="color:#f92672">;</span>
-
-    <span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">loader</span> <span style="color:#f92672">=</span> loader<span style="color:#f92672">;</span>
-  <span style="color:#f92672">}</span>  
-
-  <span style="color:#a6e22e">@Override</span>
-  <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">boolean</span> <span style="color:#a6e22e">implies</span><span style="color:#f92672">(</span>Permission permission<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
-    <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span><span style="color:#f92672">!</span><span style="color:#f92672">(</span>permission <span style="color:#66d9ef">instanceof</span> UserSetAccessiblePermission<span style="color:#f92672">)</span><span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
-      <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">false</span><span style="color:#f92672">;</span>
-    <span style="color:#f92672">}</span>
-
-    UserSetAccessiblePermission that <span style="color:#f92672">=</span> <span style="color:#f92672">(</span>UserSetAccessiblePermission<span style="color:#f92672">)</span> permission<span style="color:#f92672">;</span>
-
-    <span style="color:#66d9ef">return</span> that<span style="color:#f92672">.</span><span style="color:#a6e22e">loader</span> <span style="color:#f92672">=</span><span style="color:#f92672">=</span> <span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">loader</span><span style="color:#f92672">;</span>
-  <span style="color:#f92672">}</span>  
-
-  <span style="color:#75715e">// equals and hashCode omitted  
-</span><span style="color:#75715e"></span>
-  <span style="color:#a6e22e">@Override</span>
-  <span style="color:#66d9ef">public</span> String <span style="color:#a6e22e">getActions</span><span style="color:#f92672">(</span><span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
-    <span style="color:#66d9ef">return</span> <span style="color:#e6db74">&#34;&#34;</span><span style="color:#f92672">;</span>
-  <span style="color:#f92672">}</span>
-<span style="color:#f92672">}</span>
-</code></pre></div><p>With the permission class in place, next we need a place to actually check the permission. This will happen in our custom implementation of the <code>setAccessible</code> method that will replace the standard <code>setAccessible</code> method. This can be done using Byte Buddy by creating our custom implementation as a static method with method parameters compatible with the standard <code>setAccessible</code>.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-Java" data-lang="Java"><span style="display:flex;"><span><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">UserSetAccessiblePermission</span> <span style="color:#66d9ef">extends</span> Permission {
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">final</span> ClassLoader loader;  
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">public</span> <span style="color:#a6e22e">UserSetAccessiblePermission</span>(ClassLoader loader) {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">super</span>(<span style="color:#e6db74">&#34;userSetAccessible&#34;</span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">this</span>.<span style="color:#a6e22e">loader</span> <span style="color:#f92672">=</span> loader;
+</span></span><span style="display:flex;"><span>  }  
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">@Override</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">boolean</span> <span style="color:#a6e22e">implies</span>(Permission permission) {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> (<span style="color:#f92672">!</span>(permission <span style="color:#66d9ef">instanceof</span> UserSetAccessiblePermission)) {
+</span></span><span style="display:flex;"><span>      <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">false</span>;
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    UserSetAccessiblePermission that <span style="color:#f92672">=</span> (UserSetAccessiblePermission) permission;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> that.<span style="color:#a6e22e">loader</span> <span style="color:#f92672">==</span> <span style="color:#66d9ef">this</span>.<span style="color:#a6e22e">loader</span>;
+</span></span><span style="display:flex;"><span>  }  
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">// equals and hashCode omitted  </span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">@Override</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">public</span> String <span style="color:#a6e22e">getActions</span>() {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> <span style="color:#e6db74">&#34;&#34;</span>;
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>With the permission class in place, next we need a place to actually check the permission. This will happen in our custom implementation of the <code>setAccessible</code> method that will replace the standard <code>setAccessible</code> method. This can be done using Byte Buddy by creating our custom implementation as a static method with method parameters compatible with the standard <code>setAccessible</code>.</p>
 <p>This class has a few interesting parts. It uses the <code>@This</code> annotation from Byte Buddy to get the object the original <code>setAccessible</code> method was called on. Access to this object can be used to retrieve the class loader of the object the accessibility is attempting to be changed on (callee). If the class loader is not an instance of the user class loader, then we just check the standard permission, but if it is a user class loader, then we continue with checking the custom permission. To check the permission we create an instance of the new permission with the class loader of the callee. If the caller has the same permission with the same instance of the user class loader, then the permissions is granted (a <code>SecurityException</code> is not thrown).</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">AccessibleObjectStub</span> <span style="color:#f92672">{</span>
-  <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">final</span> <span style="color:#66d9ef">static</span> Permission STANDARD_ACCESS_PERMISSION <span style="color:#f92672">=</span>
-      <span style="color:#66d9ef">new</span> ReflectPermission<span style="color:#f92672">(</span><span style="color:#e6db74">&#34;suppressAccessChecks&#34;</span><span style="color:#f92672">)</span><span style="color:#f92672">;</span>
-
-  <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">static</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">setAccessible</span><span style="color:#f92672">(</span><span style="color:#a6e22e">@This</span> AccessibleObject ao<span style="color:#f92672">,</span> <span style="color:#66d9ef">boolean</span> flag<span style="color:#f92672">)</span>
-      <span style="color:#66d9ef">throws</span> SecurityException <span style="color:#f92672">{</span>
-    SecurityManager sm <span style="color:#f92672">=</span> System<span style="color:#f92672">.</span><span style="color:#a6e22e">getSecurityManager</span><span style="color:#f92672">(</span><span style="color:#f92672">)</span><span style="color:#f92672">;</span>
-    <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>sm <span style="color:#f92672">!</span><span style="color:#f92672">=</span> <span style="color:#66d9ef">null</span><span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
-      Permission permission <span style="color:#f92672">=</span> STANDARD_ACCESS_PERMISSION<span style="color:#f92672">;</span>
-      <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>isFromUserLoader<span style="color:#f92672">(</span>ao<span style="color:#f92672">)</span><span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
-        <span style="color:#66d9ef">try</span> <span style="color:#f92672">{</span>
-          permission <span style="color:#f92672">=</span> getUserAccessPermission<span style="color:#f92672">(</span>ao<span style="color:#f92672">)</span><span style="color:#f92672">;</span>
-        <span style="color:#f92672">}</span> <span style="color:#66d9ef">catch</span> <span style="color:#f92672">(</span>Exception e<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
-          <span style="color:#75715e">// Ignore. Use standard permission.
-</span><span style="color:#75715e"></span>        <span style="color:#f92672">}</span>
-      <span style="color:#f92672">}</span>
-
-      sm<span style="color:#f92672">.</span><span style="color:#a6e22e">checkPermission</span><span style="color:#f92672">(</span>permission<span style="color:#f92672">)</span><span style="color:#f92672">;</span>
-    <span style="color:#f92672">}</span>
-  <span style="color:#f92672">}</span>
-
-  <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">static</span> Permission <span style="color:#a6e22e">getUserAccessPermission</span><span style="color:#f92672">(</span>AccessibleObject ao<span style="color:#f92672">)</span>
-      <span style="color:#66d9ef">throws</span> IllegalAccessException<span style="color:#f92672">,</span> InvocationTargetException<span style="color:#f92672">,</span> InstantiationException<span style="color:#f92672">,</span>
-      NoSuchMethodException<span style="color:#f92672">,</span> ClassNotFoundException <span style="color:#f92672">{</span>
-    ClassLoader aoClassLoader <span style="color:#f92672">=</span> getAccessibleObjectLoader<span style="color:#f92672">(</span>ao<span style="color:#f92672">)</span><span style="color:#f92672">;</span>
-    <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">new</span> UserSetAccessiblePermission<span style="color:#f92672">(</span>aoClassLoader<span style="color:#f92672">)</span><span style="color:#f92672">;</span>
-  <span style="color:#f92672">}</span>
-
-  <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">static</span> ClassLoader <span style="color:#a6e22e">getAccessibleObjectLoader</span><span style="color:#f92672">(</span>AccessibleObject ao<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
-    <span style="color:#66d9ef">return</span> AccessController<span style="color:#f92672">.</span><span style="color:#a6e22e">doPrivileged</span><span style="color:#f92672">(</span><span style="color:#66d9ef">new</span> PrivilegedAction<span style="color:#f92672">&lt;</span>ClassLoader<span style="color:#f92672">&gt;</span><span style="color:#f92672">(</span><span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
-      <span style="color:#a6e22e">@Override</span>
-      <span style="color:#66d9ef">public</span> ClassLoader <span style="color:#a6e22e">run</span><span style="color:#f92672">(</span><span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
-        <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>ao <span style="color:#66d9ef">instanceof</span> Executable<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
-          <span style="color:#66d9ef">return</span> <span style="color:#f92672">(</span><span style="color:#f92672">(</span>Executable<span style="color:#f92672">)</span> ao<span style="color:#f92672">)</span><span style="color:#f92672">.</span><span style="color:#a6e22e">getDeclaringClass</span><span style="color:#f92672">(</span><span style="color:#f92672">)</span><span style="color:#f92672">.</span><span style="color:#a6e22e">getClassLoader</span><span style="color:#f92672">(</span><span style="color:#f92672">)</span><span style="color:#f92672">;</span>
-        <span style="color:#f92672">}</span> <span style="color:#66d9ef">else</span> <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>ao <span style="color:#66d9ef">instanceof</span> Field<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
-          <span style="color:#66d9ef">return</span> <span style="color:#f92672">(</span><span style="color:#f92672">(</span>Field<span style="color:#f92672">)</span> ao<span style="color:#f92672">)</span><span style="color:#f92672">.</span><span style="color:#a6e22e">getDeclaringClass</span><span style="color:#f92672">(</span><span style="color:#f92672">)</span><span style="color:#f92672">.</span><span style="color:#a6e22e">getClassLoader</span><span style="color:#f92672">(</span><span style="color:#f92672">)</span><span style="color:#f92672">;</span>
-        <span style="color:#f92672">}</span>
-
-        <span style="color:#66d9ef">throw</span> <span style="color:#66d9ef">new</span> IllegalStateException<span style="color:#f92672">(</span><span style="color:#e6db74">&#34;Unknown AccessibleObject type: &#34;</span> <span style="color:#f92672">+</span> ao<span style="color:#f92672">.</span><span style="color:#a6e22e">getClass</span><span style="color:#f92672">(</span><span style="color:#f92672">)</span><span style="color:#f92672">)</span><span style="color:#f92672">;</span>
-      <span style="color:#f92672">}</span>
-    <span style="color:#f92672">}</span><span style="color:#f92672">)</span><span style="color:#f92672">;</span>
-  <span style="color:#f92672">}</span>
-
-  <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">static</span> <span style="color:#66d9ef">boolean</span> <span style="color:#a6e22e">isFromUserLoader</span><span style="color:#f92672">(</span>AccessibleObject ao<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
-    ClassLoader loader <span style="color:#f92672">=</span> getAccessibleObjectLoader<span style="color:#f92672">(</span>ao<span style="color:#f92672">)</span><span style="color:#f92672">;</span>
-
-    <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>loader <span style="color:#f92672">=</span><span style="color:#f92672">=</span> <span style="color:#66d9ef">null</span><span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
-      <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">false</span><span style="color:#f92672">;</span>
-    <span style="color:#f92672">}</span>
-
-    <span style="color:#66d9ef">return</span> UserClassLoaders<span style="color:#f92672">.</span><span style="color:#a6e22e">isUserClassLoader</span><span style="color:#f92672">(</span>loader<span style="color:#f92672">)</span><span style="color:#f92672">;</span>
-  <span style="color:#f92672">}</span>
-<span style="color:#f92672">}</span>
-</code></pre></div><p>This gets us most of the way, but not quite all the way there. This replacement implementation only checks the permission, but we still need to actually modify the accessibility of the object after the permission is granted. This cannot be done directly by the replacement as the accessibility is controlled by a private field on the <code>AccessibleObject</code>. We can, however, accomplish this using the method chaining feature of Byte Buddy, which can be used to chain private methods. The private field on the <code>AccessibleObject</code> class is controlled by a private method named <code>setAccessible0</code> which we can chain as part of our Byte Buddy transformation using the <code>andThen</code> method.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">AccessibleObjectStub</span> {
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">final</span> <span style="color:#66d9ef">static</span> Permission STANDARD_ACCESS_PERMISSION <span style="color:#f92672">=</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#66d9ef">new</span> ReflectPermission(<span style="color:#e6db74">&#34;suppressAccessChecks&#34;</span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">static</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">setAccessible</span>(<span style="color:#a6e22e">@This</span> AccessibleObject ao, <span style="color:#66d9ef">boolean</span> flag)
+</span></span><span style="display:flex;"><span>      <span style="color:#66d9ef">throws</span> SecurityException {
+</span></span><span style="display:flex;"><span>    SecurityManager sm <span style="color:#f92672">=</span> System.<span style="color:#a6e22e">getSecurityManager</span>();
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> (sm <span style="color:#f92672">!=</span> <span style="color:#66d9ef">null</span>) {
+</span></span><span style="display:flex;"><span>      Permission permission <span style="color:#f92672">=</span> STANDARD_ACCESS_PERMISSION;
+</span></span><span style="display:flex;"><span>      <span style="color:#66d9ef">if</span> (isFromUserLoader(ao)) {
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">try</span> {
+</span></span><span style="display:flex;"><span>          permission <span style="color:#f92672">=</span> getUserAccessPermission(ao);
+</span></span><span style="display:flex;"><span>        } <span style="color:#66d9ef">catch</span> (Exception e) {
+</span></span><span style="display:flex;"><span>          <span style="color:#75715e">// Ignore. Use standard permission.</span>
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>      }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>      sm.<span style="color:#a6e22e">checkPermission</span>(permission);
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">static</span> Permission <span style="color:#a6e22e">getUserAccessPermission</span>(AccessibleObject ao)
+</span></span><span style="display:flex;"><span>      <span style="color:#66d9ef">throws</span> IllegalAccessException, InvocationTargetException, InstantiationException,
+</span></span><span style="display:flex;"><span>      NoSuchMethodException, ClassNotFoundException {
+</span></span><span style="display:flex;"><span>    ClassLoader aoClassLoader <span style="color:#f92672">=</span> getAccessibleObjectLoader(ao);
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">new</span> UserSetAccessiblePermission(aoClassLoader);
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">static</span> ClassLoader <span style="color:#a6e22e">getAccessibleObjectLoader</span>(AccessibleObject ao) {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> AccessController.<span style="color:#a6e22e">doPrivileged</span>(<span style="color:#66d9ef">new</span> PrivilegedAction<span style="color:#f92672">&lt;</span>ClassLoader<span style="color:#f92672">&gt;</span>() {
+</span></span><span style="display:flex;"><span>      <span style="color:#a6e22e">@Override</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#66d9ef">public</span> ClassLoader <span style="color:#a6e22e">run</span>() {
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> (ao <span style="color:#66d9ef">instanceof</span> Executable) {
+</span></span><span style="display:flex;"><span>          <span style="color:#66d9ef">return</span> ((Executable) ao).<span style="color:#a6e22e">getDeclaringClass</span>().<span style="color:#a6e22e">getClassLoader</span>();
+</span></span><span style="display:flex;"><span>        } <span style="color:#66d9ef">else</span> <span style="color:#66d9ef">if</span> (ao <span style="color:#66d9ef">instanceof</span> Field) {
+</span></span><span style="display:flex;"><span>          <span style="color:#66d9ef">return</span> ((Field) ao).<span style="color:#a6e22e">getDeclaringClass</span>().<span style="color:#a6e22e">getClassLoader</span>();
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">throw</span> <span style="color:#66d9ef">new</span> IllegalStateException(<span style="color:#e6db74">&#34;Unknown AccessibleObject type: &#34;</span> <span style="color:#f92672">+</span> ao.<span style="color:#a6e22e">getClass</span>());
+</span></span><span style="display:flex;"><span>      }
+</span></span><span style="display:flex;"><span>    });
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">static</span> <span style="color:#66d9ef">boolean</span> <span style="color:#a6e22e">isFromUserLoader</span>(AccessibleObject ao) {
+</span></span><span style="display:flex;"><span>    ClassLoader loader <span style="color:#f92672">=</span> getAccessibleObjectLoader(ao);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> (loader <span style="color:#f92672">==</span> <span style="color:#66d9ef">null</span>) {
+</span></span><span style="display:flex;"><span>      <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">false</span>;
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> UserClassLoaders.<span style="color:#a6e22e">isUserClassLoader</span>(loader);
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>This gets us most of the way, but not quite all the way there. This replacement implementation only checks the permission, but we still need to actually modify the accessibility of the object after the permission is granted. This cannot be done directly by the replacement as the accessibility is controlled by a private field on the <code>AccessibleObject</code>. We can, however, accomplish this using the method chaining feature of Byte Buddy, which can be used to chain private methods. The private field on the <code>AccessibleObject</code> class is controlled by a private method named <code>setAccessible0</code> which we can chain as part of our Byte Buddy transformation using the <code>andThen</code> method.</p>
 <p>First create a Byte Buddy type pool that includes the bootstrap classloader and your jar that includes the stubs.</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#66d9ef">final</span> TypePool bootstrapTypePool <span style="color:#f92672">=</span> TypePool<span style="color:#f92672">.</span><span style="color:#a6e22e">Default</span><span style="color:#f92672">.</span><span style="color:#a6e22e">of</span><span style="color:#f92672">(</span>
-    <span style="color:#66d9ef">new</span> ClassFileLocator<span style="color:#f92672">.</span><span style="color:#a6e22e">Compound</span><span style="color:#f92672">(</span>
-        <span style="color:#66d9ef">new</span> ClassFileLocator<span style="color:#f92672">.</span><span style="color:#a6e22e">ForJarFile</span><span style="color:#f92672">(</span>jarFile<span style="color:#f92672">)</span><span style="color:#f92672">,</span>
-        ClassFileLocator<span style="color:#f92672">.</span><span style="color:#a6e22e">ForClassLoader</span><span style="color:#f92672">.</span><span style="color:#a6e22e">of</span><span style="color:#f92672">(</span><span style="color:#66d9ef">null</span><span style="color:#f92672">)</span><span style="color:#f92672">)</span><span style="color:#f92672">)</span><span style="color:#f92672">;</span>
-</code></pre></div><p>Next get the <code>AccessibleObject.setAccessible0</code> method using reflections.</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">Method setAccessible0Method<span style="color:#f92672">;</span>
-<span style="color:#66d9ef">try</span> <span style="color:#f92672">{</span>
-  String setAccessible0MethodName <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;setAccessible0&#34;</span><span style="color:#f92672">;</span>
-  Class<span style="color:#f92672">[</span><span style="color:#f92672">]</span> paramTypes <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> Class<span style="color:#f92672">[</span>2<span style="color:#f92672">]</span><span style="color:#f92672">;</span>
-  paramTypes<span style="color:#f92672">[</span>0<span style="color:#f92672">]</span> <span style="color:#f92672">=</span> AccessibleObject<span style="color:#f92672">.</span><span style="color:#a6e22e">class</span><span style="color:#f92672">;</span>
-  paramTypes<span style="color:#f92672">[</span>1<span style="color:#f92672">]</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">boolean</span><span style="color:#f92672">.</span><span style="color:#a6e22e">class</span><span style="color:#f92672">;</span>
-  setAccessible0Method <span style="color:#f92672">=</span> AccessibleObject<span style="color:#f92672">.</span><span style="color:#a6e22e">class</span>
-      <span style="color:#f92672">.</span><span style="color:#a6e22e">getDeclaredMethod</span><span style="color:#f92672">(</span>setAccessible0MethodName<span style="color:#f92672">,</span> paramTypes<span style="color:#f92672">)</span><span style="color:#f92672">;</span>
-<span style="color:#f92672">}</span> <span style="color:#66d9ef">catch</span> <span style="color:#f92672">(</span>NoSuchMethodException e<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
-  <span style="color:#66d9ef">throw</span> <span style="color:#66d9ef">new</span> RuntimeException<span style="color:#f92672">(</span>e<span style="color:#f92672">)</span><span style="color:#f92672">;</span>
-<span style="color:#f92672">}</span>
-</code></pre></div><p>With those two pieces we can now build the Byte Buddy transformer to match on the <code>setAccessible</code> method and to delegate to the stub and chain to the <code>setAccessible0</code> method.</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">AgentBuilder<span style="color:#f92672">.</span><span style="color:#a6e22e">Transformer</span> transformer <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> AgentBuilder<span style="color:#f92672">.</span><span style="color:#a6e22e">Transformer</span><span style="color:#f92672">(</span><span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
-  <span style="color:#a6e22e">@Override</span>
-  <span style="color:#66d9ef">public</span> DynamicType<span style="color:#f92672">.</span><span style="color:#a6e22e">Builder</span><span style="color:#f92672">&lt;</span><span style="color:#f92672">?</span><span style="color:#f92672">&gt;</span> transform<span style="color:#f92672">(</span>
-      DynamicType<span style="color:#f92672">.</span><span style="color:#a6e22e">Builder</span><span style="color:#f92672">&lt;</span><span style="color:#f92672">?</span><span style="color:#f92672">&gt;</span> builder<span style="color:#f92672">,</span>
-      TypeDescription typeDescription<span style="color:#f92672">,</span> ClassLoader classLoader<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
-    <span style="color:#66d9ef">return</span> builder<span style="color:#f92672">.</span><span style="color:#a6e22e">method</span><span style="color:#f92672">(</span>
-        ElementMatchers<span style="color:#f92672">.</span><span style="color:#a6e22e">named</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;setAccessible&#34;</span><span style="color:#f92672">)</span>
-            <span style="color:#f92672">.</span><span style="color:#a6e22e">and</span><span style="color:#f92672">(</span>ElementMatchers<span style="color:#f92672">.</span><span style="color:#a6e22e">takesArguments</span><span style="color:#f92672">(</span><span style="color:#66d9ef">boolean</span><span style="color:#f92672">.</span><span style="color:#a6e22e">class</span><span style="color:#f92672">)</span><span style="color:#f92672">)</span><span style="color:#f92672">)</span>
-        <span style="color:#f92672">.</span><span style="color:#a6e22e">intercept</span><span style="color:#f92672">(</span>MethodDelegation<span style="color:#f92672">.</span><span style="color:#a6e22e">to</span><span style="color:#f92672">(</span>
-            bootstrapTypePool<span style="color:#f92672">.</span><span style="color:#a6e22e">describe</span><span style="color:#f92672">(</span>
-                <span style="color:#e6db74">&#34;com.leacox.sandbox.security.stub.java.lang.reflect.AccessibleObjectStub&#34;</span><span style="color:#f92672">)</span>
-                <span style="color:#f92672">.</span><span style="color:#a6e22e">resolve</span><span style="color:#f92672">(</span><span style="color:#f92672">)</span><span style="color:#f92672">)</span>
-            <span style="color:#f92672">.</span><span style="color:#a6e22e">andThen</span><span style="color:#f92672">(</span>MethodCall<span style="color:#f92672">.</span><span style="color:#a6e22e">invoke</span><span style="color:#f92672">(</span>setAccessible0Method<span style="color:#f92672">)</span><span style="color:#f92672">.</span><span style="color:#a6e22e">withThis</span><span style="color:#f92672">(</span><span style="color:#f92672">)</span><span style="color:#f92672">.</span><span style="color:#a6e22e">withAllArguments</span><span style="color:#f92672">(</span><span style="color:#f92672">)</span><span style="color:#f92672">)</span><span style="color:#f92672">)</span><span style="color:#f92672">;</span>
-  <span style="color:#f92672">}</span>
-<span style="color:#f92672">}</span>
-</code></pre></div><p>That will take care of replacing the default implementation of <code>setAccessible</code> with our custom implementation and chain to the <code>setAccessible0</code> method if permission is granted. If an exception occurs, for instance due to permissions not being granted, the chained transformation will exit early avoiding the call to actually change the accessibility.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span><span style="color:#66d9ef">final</span> TypePool bootstrapTypePool <span style="color:#f92672">=</span> TypePool.<span style="color:#a6e22e">Default</span>.<span style="color:#a6e22e">of</span>(
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">new</span> ClassFileLocator.<span style="color:#a6e22e">Compound</span>(
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">new</span> ClassFileLocator.<span style="color:#a6e22e">ForJarFile</span>(jarFile),
+</span></span><span style="display:flex;"><span>        ClassFileLocator.<span style="color:#a6e22e">ForClassLoader</span>.<span style="color:#a6e22e">of</span>(<span style="color:#66d9ef">null</span>)));
+</span></span></code></pre></div><p>Next get the <code>AccessibleObject.setAccessible0</code> method using reflections.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span>Method setAccessible0Method;
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">try</span> {
+</span></span><span style="display:flex;"><span>  String setAccessible0MethodName <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;setAccessible0&#34;</span>;
+</span></span><span style="display:flex;"><span>  Class<span style="color:#f92672">[]</span> paramTypes <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> Class<span style="color:#f92672">[</span>2<span style="color:#f92672">]</span>;
+</span></span><span style="display:flex;"><span>  paramTypes<span style="color:#f92672">[</span>0<span style="color:#f92672">]</span> <span style="color:#f92672">=</span> AccessibleObject.<span style="color:#a6e22e">class</span>;
+</span></span><span style="display:flex;"><span>  paramTypes<span style="color:#f92672">[</span>1<span style="color:#f92672">]</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">boolean</span>.<span style="color:#a6e22e">class</span>;
+</span></span><span style="display:flex;"><span>  setAccessible0Method <span style="color:#f92672">=</span> AccessibleObject.<span style="color:#a6e22e">class</span>
+</span></span><span style="display:flex;"><span>      .<span style="color:#a6e22e">getDeclaredMethod</span>(setAccessible0MethodName, paramTypes);
+</span></span><span style="display:flex;"><span>} <span style="color:#66d9ef">catch</span> (NoSuchMethodException e) {
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">throw</span> <span style="color:#66d9ef">new</span> RuntimeException(e);
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>With those two pieces we can now build the Byte Buddy transformer to match on the <code>setAccessible</code> method and to delegate to the stub and chain to the <code>setAccessible0</code> method.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span>AgentBuilder.<span style="color:#a6e22e">Transformer</span> transformer <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> AgentBuilder.<span style="color:#a6e22e">Transformer</span>() {
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">@Override</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">public</span> DynamicType.<span style="color:#a6e22e">Builder</span><span style="color:#f92672">&lt;?&gt;</span> transform(
+</span></span><span style="display:flex;"><span>      DynamicType.<span style="color:#a6e22e">Builder</span><span style="color:#f92672">&lt;?&gt;</span> builder,
+</span></span><span style="display:flex;"><span>      TypeDescription typeDescription, ClassLoader classLoader) {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> builder.<span style="color:#a6e22e">method</span>(
+</span></span><span style="display:flex;"><span>        ElementMatchers.<span style="color:#a6e22e">named</span>(<span style="color:#e6db74">&#34;setAccessible&#34;</span>)
+</span></span><span style="display:flex;"><span>            .<span style="color:#a6e22e">and</span>(ElementMatchers.<span style="color:#a6e22e">takesArguments</span>(<span style="color:#66d9ef">boolean</span>.<span style="color:#a6e22e">class</span>)))
+</span></span><span style="display:flex;"><span>        .<span style="color:#a6e22e">intercept</span>(MethodDelegation.<span style="color:#a6e22e">to</span>(
+</span></span><span style="display:flex;"><span>            bootstrapTypePool.<span style="color:#a6e22e">describe</span>(
+</span></span><span style="display:flex;"><span>                <span style="color:#e6db74">&#34;com.leacox.sandbox.security.stub.java.lang.reflect.AccessibleObjectStub&#34;</span>)
+</span></span><span style="display:flex;"><span>                .<span style="color:#a6e22e">resolve</span>())
+</span></span><span style="display:flex;"><span>            .<span style="color:#a6e22e">andThen</span>(MethodCall.<span style="color:#a6e22e">invoke</span>(setAccessible0Method).<span style="color:#a6e22e">withThis</span>().<span style="color:#a6e22e">withAllArguments</span>()));
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>That will take care of replacing the default implementation of <code>setAccessible</code> with our custom implementation and chain to the <code>setAccessible0</code> method if permission is granted. If an exception occurs, for instance due to permissions not being granted, the chained transformation will exit early avoiding the call to actually change the accessibility.</p>
 <p>The final step is to install Byte Buddy as a Java agent and actually perform the transformation. With a SecurityManager installed and this transformation executed, you can now run untrusted code with permissions to modify the accessibility of its own classes and methods, but not standard Java, your own runtime jar or other isolated code.</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">Instrumentation instrumentation <span style="color:#f92672">=</span> ByteBuddyAgent<span style="color:#f92672">.</span><span style="color:#a6e22e">install</span><span style="color:#f92672">(</span><span style="color:#f92672">)</span><span style="color:#f92672">;</span>
-<span style="color:#75715e">// Append the jar containing the stub replacement to the bootstrap classpath
-</span><span style="color:#75715e"></span>instrumentation<span style="color:#f92672">.</span><span style="color:#a6e22e">appendToBootstrapClassLoaderSearch</span><span style="color:#f92672">(</span>jarFile<span style="color:#f92672">)</span><span style="color:#f92672">;</span>
-
-AgentBuilder agentBuilder <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> AgentBuilder<span style="color:#f92672">.</span><span style="color:#a6e22e">Default</span><span style="color:#f92672">(</span><span style="color:#f92672">)</span>
-       <span style="color:#f92672">.</span><span style="color:#a6e22e">disableClassFormatChanges</span><span style="color:#f92672">(</span><span style="color:#f92672">)</span>
-       <span style="color:#f92672">.</span><span style="color:#a6e22e">with</span><span style="color:#f92672">(</span>AgentBuilder<span style="color:#f92672">.</span><span style="color:#a6e22e">RedefinitionStrategy</span><span style="color:#f92672">.</span><span style="color:#a6e22e">RETRANSFORMATION</span><span style="color:#f92672">)</span>
-       <span style="color:#f92672">.</span><span style="color:#a6e22e">ignore</span><span style="color:#f92672">(</span>none<span style="color:#f92672">(</span><span style="color:#f92672">)</span><span style="color:#f92672">)</span><span style="color:#f92672">;</span> <span style="color:#75715e">// disable default ignores so we can transform Java classes
-</span><span style="color:#75715e"></span>       <span style="color:#f92672">.</span><span style="color:#a6e22e">type</span><span style="color:#f92672">(</span>ElementMatchers<span style="color:#f92672">.</span><span style="color:#a6e22e">named</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;java.lang.reflect.AccessibleObject&#34;</span><span style="color:#f92672">)</span><span style="color:#f92672">)</span>
-       <span style="color:#f92672">.</span><span style="color:#a6e22e">transform</span><span style="color:#f92672">(</span>transformer<span style="color:#f92672">)</span>
-       <span style="color:#f92672">.</span><span style="color:#a6e22e">installOnByteBuddyAgent</span><span style="color:#f92672">(</span><span style="color:#f92672">)</span><span style="color:#f92672">;</span>
-</code></pre></div><p>In addition to everything above, you would also want to transform the other setAccessible method, <code>setAccessible(AccessibleObject[] array, boolean flag)</code>. For more information on this and a full implementation of a simple sandboxed runtime with this transformation have a look at my <a href="https://github.com/johnlcox/sandbox-runtime">sandbox-runtime</a> on Github.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span>Instrumentation instrumentation <span style="color:#f92672">=</span> ByteBuddyAgent.<span style="color:#a6e22e">install</span>();
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// Append the jar containing the stub replacement to the bootstrap classpath</span>
+</span></span><span style="display:flex;"><span>instrumentation.<span style="color:#a6e22e">appendToBootstrapClassLoaderSearch</span>(jarFile);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>AgentBuilder agentBuilder <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> AgentBuilder.<span style="color:#a6e22e">Default</span>()
+</span></span><span style="display:flex;"><span>       .<span style="color:#a6e22e">disableClassFormatChanges</span>()
+</span></span><span style="display:flex;"><span>       .<span style="color:#a6e22e">with</span>(AgentBuilder.<span style="color:#a6e22e">RedefinitionStrategy</span>.<span style="color:#a6e22e">RETRANSFORMATION</span>)
+</span></span><span style="display:flex;"><span>       .<span style="color:#a6e22e">ignore</span>(none()); <span style="color:#75715e">// disable default ignores so we can transform Java classes</span>
+</span></span><span style="display:flex;"><span>       .<span style="color:#a6e22e">type</span>(ElementMatchers.<span style="color:#a6e22e">named</span>(<span style="color:#e6db74">&#34;java.lang.reflect.AccessibleObject&#34;</span>))
+</span></span><span style="display:flex;"><span>       .<span style="color:#a6e22e">transform</span>(transformer)
+</span></span><span style="display:flex;"><span>       .<span style="color:#a6e22e">installOnByteBuddyAgent</span>();
+</span></span></code></pre></div><p>In addition to everything above, you would also want to transform the other setAccessible method, <code>setAccessible(AccessibleObject[] array, boolean flag)</code>. For more information on this and a full implementation of a simple sandboxed runtime with this transformation have a look at my <a href="https://github.com/johnlcox/sandbox-runtime">sandbox-runtime</a> on Github.</p>
 
   
   
