@@ -5,7 +5,7 @@
   <meta http-equiv="content-type" content="text/html; charset=utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description" content="">
-  <meta name="generator" content="Hugo 0.124.1">
+  <meta name="generator" content="Hugo 0.163.3">
 
   <title>Ideas on Software Engineering</title>
 
@@ -225,7 +225,7 @@
 
   <div>
   <div class="small-print">
-    <small>&copy; 2012 - 2020 John Leacox. All rights reserved.</small>
+    <small>&copy; 2012 - 2026 John Leacox. All rights reserved.</small>
   </div>
   
 </div>
@@ -281,7 +281,7 @@
   </header>
 
   <p>
-  I recently implemented a feature to put bounds on camera movement for the Idle Pachinko game that Matt Torres and I have been developing. When I write code, I typically write it in multiple passes like how an author of a paper or a book takes multiple editing passes over their text. Below is the code for the camera bounds feature in multiple passes, showing how I improved the quality and understandability of the code before opening a pull request and calling it done.
+  <p>I recently implemented a feature to put bounds on camera movement for the Idle Pachinko game that Matt Torres and I have been developing. When I write code, I typically write it in multiple passes like how an author of a paper or a book takes multiple editing passes over their text. Below is the code for the camera bounds feature in multiple passes, showing how I improved the quality and understandability of the code before opening a pull request and calling it done.</p>
   </p>
 
   
@@ -328,7 +328,7 @@
   </header>
 
   <p>
-  The Java SecurityManager provides a lot of good permissions for restricted what untrusted code can access. The downside of the standard permissions is that many of them are too broad, making it hard to enable permissions around commonly used functionality without defeating the purpose of the restricted security. The permissions around reflections are one of these cases, where the permissions around the setAccessible reflections method is either all on or all off.
+  <p>The Java <code>SecurityManager</code> provides a lot of good permissions for restricted what untrusted code can access. The downside of the standard permissions is that many of them are too broad, making it hard to enable permissions around commonly used functionality without defeating the purpose of the restricted security. The permissions around reflections are one of these cases, where the permissions around the <code>setAccessible</code> reflections method is either all on or all off. It is possible to work around this default behavior, providing more selective fine-grained permissions, by using bytecode weaving. However, for any of this this to work the Java <code>SecurityManager</code> must be used along with loading the code that these permissions will be applied to from a separate jar, probably using a custom or at least isolated instance of a <code>URLClassLoader</code>. This is a prerequisite which has already been well documented by Will Sargent in his post <a href="https://tersesystems.com/2015/12/29/sandbox-experiment/">Self-Protecting Sandbox Using SecurityManager</a> as well as my own example sandbox runtime environment <a href="https://github.com/johnlcox/sandbox-runtime">sandbox-runtime</a>.</p>
   </p>
 
   
@@ -379,7 +379,7 @@
   </header>
 
   <p>
-  I&rsquo;ve been writing Scala off and on for the last several years. I took both of the Scala courses on Coursera and really enjoyed them. However, I still write a lot of Java. There are a lot of Scala features that I miss while working with Java, and as Java 8 was coming out in early 2014, I thought about feature parity between the two languages. The addition of lambdas to Java is great, but one of my favorite features of Scala is pattern matching, and Java 8 does not include that.
+  <p>I&rsquo;ve been writing Scala off and on for the last several years. I took both of the Scala courses on Coursera and really enjoyed them. However, I still write a lot of Java. There are a lot of Scala features that I miss while working with Java, and as Java 8 was coming out in early 2014, I thought about feature parity between the two languages. The addition of lambdas to Java is great, but one of my favorite features of Scala is pattern matching, and Java 8 does not include that. At the time I started to wonder if pattern matching could be implemented as a Java library. I wasn&rsquo;t sure if it would even be possible, but I wrote up a quick <a href="https://gist.github.com/johnlcox/d6dded9807c5f6580626">Github gist</a> with what some different patterns might look like.</p>
   </p>
 
   
@@ -430,7 +430,7 @@
   </header>
 
   <p>
-  A lot of server software runs on Java, but the different Java processes are listed as simply Java via commands like top or ps -ef. One feature of the Stackify agent is tracking the running processes on a server. I needed a way to identify what each Java process really was in a fairly simple and concise way, but there isn’t a clear winner in the output of the top or ps commands.
+  <p>A lot of server software runs on Java, but the different Java processes are listed as simply <code>Java</code> via commands like <code>top</code> or <code>ps -ef</code>. One feature of the <a href="http://www.stackify.com">Stackify</a> agent is tracking the running processes on a server. I needed a way to identify what each Java process really was in a fairly simple and concise way, but there isn’t a clear winner in the output of the top or ps commands.</p>
   </p>
 
   
@@ -475,7 +475,7 @@
   </header>
 
   <p>
-  If you have ever had to start a subprocess from a Java application, then you likely know how painful it can be to use the Process class via Runtime.exec or ProcessBuilder. There are numerous posts on stackoverflow as well as a multitude of blog posts on the correct usage of the Process class. I found a blog post on the five common pitfalls of the Process class to be the most helpful when I began using subprocesses.
+  <p>If you have ever had to start a subprocess from a Java application, then you likely know how painful it can be to use the Process class via Runtime.exec or ProcessBuilder. There are numerous posts on <a href="http://stackoverflow.com/search?tab=votes&amp;q=%5bjava%5d%20processbuilder">stackoverflow</a> as well as a multitude of blog posts on the correct usage of the Process class. I found a blog post on the <a href="http://kylecartmell.com/?p=9">five common pitfalls of the Process class</a> to be the most helpful when I began using subprocesses. Being aware of the pitfalls helps, but if you are running a lot of subprocesses, the additional code needed in each instance can become tedious and you increase the odds of making a mistake. I ended up creating the <a href="https://github.com/johnlcox/process-warden">process-warden</a> library for a safer way to create Java subprocesses that is reusable.</p>
   </p>
 
   

@@ -5,7 +5,7 @@
   <meta http-equiv="content-type" content="text/html; charset=utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description" content="">
-  <meta name="generator" content="Hugo 0.124.1">
+  <meta name="generator" content="Hugo 0.163.3">
 
   <title>Implementing Scala-like Pattern Matching in Java 8 &middot; Ideas on Software Engineering</title>
 
@@ -225,7 +225,7 @@
 
   <div>
   <div class="small-print">
-    <small>&copy; 2012 - 2020 John Leacox. All rights reserved.</small>
+    <small>&copy; 2012 - 2026 John Leacox. All rights reserved.</small>
   </div>
   
 </div>
@@ -281,13 +281,13 @@
 <p>The expressions library pattern matching was closer to what I had in mind. It can extract top-level and nested values, but it requires implementing a &lsquo;constructor&rsquo; method for anything you want to match on and doesn&rsquo;t built-in matching for things like <code>Optional</code> or <code>List</code>. At this point I decided I&rsquo;d give a shot at implementing pattern matching in Java 8 that is as close to the Scala pattern matching as possible. I like to try to come up with a good name for my projects, so I spent some time with a thesaurus looking for words related to &lsquo;matching&rsquo; and &lsquo;patterns&rsquo;, and I eventually landed on <a href="http://dictionary.reference.com/browse/motif">motif</a>.</p>
 <p>Before I go into some details about the process of implementing motif, below are some examples of what code using motif might look like.</p>
 <p>Matching on Optional:</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span>Optional<span style="color:#f92672">&lt;</span>Person<span style="color:#f92672">&gt;</span> personOpt <span style="color:#f92672">=</span> getPerson();
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-java" data-lang="java"><span style="display:flex;"><span>Optional<span style="color:#f92672">&lt;</span>Person<span style="color:#f92672">&gt;</span> personOpt <span style="color:#f92672">=</span> getPerson();
 </span></span><span style="display:flex;"><span>match(personOpt)
 </span></span><span style="display:flex;"><span>    .<span style="color:#a6e22e">when</span>(some(any())).<span style="color:#a6e22e">then</span>(person <span style="color:#f92672">-&gt;</span> doStuff(person))
 </span></span><span style="display:flex;"><span>    .<span style="color:#a6e22e">when</span>(none()).<span style="color:#a6e22e">then</span>(() <span style="color:#f92672">-&gt;</span> System.<span style="color:#a6e22e">out</span>.<span style="color:#a6e22e">println</span>(<span style="color:#e6db74">&#34;Person not found&#34;</span>))
 </span></span><span style="display:flex;"><span>    .<span style="color:#a6e22e">doMatch</span>();
 </span></span></code></pre></div><p>Nested matching:</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span>Optional<span style="color:#f92672">&lt;</span>Tuple2<span style="color:#f92672">&lt;</span>String, String<span style="color:#f92672">&gt;&gt;</span> opt <span style="color:#f92672">=</span> Optional.<span style="color:#a6e22e">of</span>(Tuple2.<span style="color:#a6e22e">of</span>(<span style="color:#e6db74">&#34;first&#34;</span>, <span style="color:#e6db74">&#34;second&#34;</span>));
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-java" data-lang="java"><span style="display:flex;"><span>Optional<span style="color:#f92672">&lt;</span>Tuple2<span style="color:#f92672">&lt;</span>String, String<span style="color:#f92672">&gt;&gt;</span> opt <span style="color:#f92672">=</span> Optional.<span style="color:#a6e22e">of</span>(Tuple2.<span style="color:#a6e22e">of</span>(<span style="color:#e6db74">&#34;first&#34;</span>, <span style="color:#e6db74">&#34;second&#34;</span>));
 </span></span><span style="display:flex;"><span>match(opt)
 </span></span><span style="display:flex;"><span>    .<span style="color:#a6e22e">when</span>(some(tuple2(eq(<span style="color:#e6db74">&#34;third&#34;</span>), any()))).<span style="color:#a6e22e">then</span>(b <span style="color:#f92672">-&gt;</span> doStuff(b))
 </span></span><span style="display:flex;"><span>    .<span style="color:#a6e22e">when</span>(some(tuple2(any(), eq(<span style="color:#e6db74">&#34;second&#34;</span>)))).<span style="color:#a6e22e">then</span>(a <span style="color:#f92672">-&gt;</span> doStuff(a))

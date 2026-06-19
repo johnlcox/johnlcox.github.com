@@ -5,7 +5,7 @@
   <meta http-equiv="content-type" content="text/html; charset=utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description" content="">
-  <meta name="generator" content="Hugo 0.124.1">
+  <meta name="generator" content="Hugo 0.163.3">
 
   <title>Security &middot; Ideas on Software Engineering</title>
 
@@ -225,7 +225,7 @@
 
   <div>
   <div class="small-print">
-    <small>&copy; 2012 - 2020 John Leacox. All rights reserved.</small>
+    <small>&copy; 2012 - 2026 John Leacox. All rights reserved.</small>
   </div>
   
 </div>
@@ -278,7 +278,7 @@
   </header>
 
   <p>
-  The Java SecurityManager provides a lot of good permissions for restricted what untrusted code can access. The downside of the standard permissions is that many of them are too broad, making it hard to enable permissions around commonly used functionality without defeating the purpose of the restricted security. The permissions around reflections are one of these cases, where the permissions around the setAccessible reflections method is either all on or all off.
+  <p>The Java <code>SecurityManager</code> provides a lot of good permissions for restricted what untrusted code can access. The downside of the standard permissions is that many of them are too broad, making it hard to enable permissions around commonly used functionality without defeating the purpose of the restricted security. The permissions around reflections are one of these cases, where the permissions around the <code>setAccessible</code> reflections method is either all on or all off. It is possible to work around this default behavior, providing more selective fine-grained permissions, by using bytecode weaving. However, for any of this this to work the Java <code>SecurityManager</code> must be used along with loading the code that these permissions will be applied to from a separate jar, probably using a custom or at least isolated instance of a <code>URLClassLoader</code>. This is a prerequisite which has already been well documented by Will Sargent in his post <a href="https://tersesystems.com/2015/12/29/sandbox-experiment/">Self-Protecting Sandbox Using SecurityManager</a> as well as my own example sandbox runtime environment <a href="https://github.com/johnlcox/sandbox-runtime">sandbox-runtime</a>.</p>
   </p>
 
   

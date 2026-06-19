@@ -5,7 +5,7 @@
   <meta http-equiv="content-type" content="text/html; charset=utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description" content="">
-  <meta name="generator" content="Hugo 0.124.1">
+  <meta name="generator" content="Hugo 0.163.3">
 
   <title>Selective setAccessible permissions using Byte Buddy and the Java SecurityManager &middot; Ideas on Software Engineering</title>
 
@@ -225,7 +225,7 @@
 
   <div>
   <div class="small-print">
-    <small>&copy; 2012 - 2020 John Leacox. All rights reserved.</small>
+    <small>&copy; 2012 - 2026 John Leacox. All rights reserved.</small>
   </div>
   
 </div>
@@ -276,7 +276,7 @@
 <p>It may appear that the only two choices are between having a secure environment and disallowing untrusted code from using libraries or languages that require reflection, or allowing such access by having an unsecure environment. However, there is an alternative if you are willing to put in the work. Libraries like <a href="https://github.com/raphw/byte-buddy">Byte Buddy</a> make it possible to replace methods of existing classes with new implementations, at runtime, through the use of a Java agent.</p>
 <p>I have implemented a custom, more fine-grained, permission around access to the <code>setAccessible</code> method. In my examples I have chosen to use the code source or the <code>ClassLoader</code> as the determining factor; code that attempts to call <code>setAccessible</code> will only be granted permission if both itself and the class it is attempting to change the accessibility of are from the same class loader. In other words, this reflections method can only be used on classes from the same jar as the untrusted code; it cannot be used to access private fields of standard Java classes. This is just what I chose, as it fit best for the security settings I&rsquo;m targeting. The determining factor could be setup in many different ways, including a package or class whitelist or blacklist.</p>
 <p>The first piece that is needed is the new custom <code>Permission</code>. This permission uses the class loader of the caller and callee to determine whether permissions should be granted or not.</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-Java" data-lang="Java"><span style="display:flex;"><span><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">UserSetAccessiblePermission</span> <span style="color:#66d9ef">extends</span> Permission {
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-Java" data-lang="Java"><span style="display:flex;"><span><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">UserSetAccessiblePermission</span> <span style="color:#66d9ef">extends</span> Permission {
 </span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">final</span> ClassLoader loader;  
 </span></span><span style="display:flex;"><span>
 </span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">public</span> <span style="color:#a6e22e">UserSetAccessiblePermission</span>(ClassLoader loader) {
@@ -305,7 +305,7 @@
 </span></span><span style="display:flex;"><span>}
 </span></span></code></pre></div><p>With the permission class in place, next we need a place to actually check the permission. This will happen in our custom implementation of the <code>setAccessible</code> method that will replace the standard <code>setAccessible</code> method. This can be done using Byte Buddy by creating our custom implementation as a static method with method parameters compatible with the standard <code>setAccessible</code>.</p>
 <p>This class has a few interesting parts. It uses the <code>@This</code> annotation from Byte Buddy to get the object the original <code>setAccessible</code> method was called on. Access to this object can be used to retrieve the class loader of the object the accessibility is attempting to be changed on (callee). If the class loader is not an instance of the user class loader, then we just check the standard permission, but if it is a user class loader, then we continue with checking the custom permission. To check the permission we create an instance of the new permission with the class loader of the callee. If the caller has the same permission with the same instance of the user class loader, then the permissions is granted (a <code>SecurityException</code> is not thrown).</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">AccessibleObjectStub</span> {
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-java" data-lang="java"><span style="display:flex;"><span><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">AccessibleObjectStub</span> {
 </span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">final</span> <span style="color:#66d9ef">static</span> Permission STANDARD_ACCESS_PERMISSION <span style="color:#f92672">=</span>
 </span></span><span style="display:flex;"><span>      <span style="color:#66d9ef">new</span> ReflectPermission(<span style="color:#e6db74">&#34;suppressAccessChecks&#34;</span>);
 </span></span><span style="display:flex;"><span>
@@ -360,12 +360,12 @@
 </span></span><span style="display:flex;"><span>}
 </span></span></code></pre></div><p>This gets us most of the way, but not quite all the way there. This replacement implementation only checks the permission, but we still need to actually modify the accessibility of the object after the permission is granted. This cannot be done directly by the replacement as the accessibility is controlled by a private field on the <code>AccessibleObject</code>. We can, however, accomplish this using the method chaining feature of Byte Buddy, which can be used to chain private methods. The private field on the <code>AccessibleObject</code> class is controlled by a private method named <code>setAccessible0</code> which we can chain as part of our Byte Buddy transformation using the <code>andThen</code> method.</p>
 <p>First create a Byte Buddy type pool that includes the bootstrap classloader and your jar that includes the stubs.</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span><span style="color:#66d9ef">final</span> TypePool bootstrapTypePool <span style="color:#f92672">=</span> TypePool.<span style="color:#a6e22e">Default</span>.<span style="color:#a6e22e">of</span>(
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-java" data-lang="java"><span style="display:flex;"><span><span style="color:#66d9ef">final</span> TypePool bootstrapTypePool <span style="color:#f92672">=</span> TypePool.<span style="color:#a6e22e">Default</span>.<span style="color:#a6e22e">of</span>(
 </span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">new</span> ClassFileLocator.<span style="color:#a6e22e">Compound</span>(
 </span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">new</span> ClassFileLocator.<span style="color:#a6e22e">ForJarFile</span>(jarFile),
 </span></span><span style="display:flex;"><span>        ClassFileLocator.<span style="color:#a6e22e">ForClassLoader</span>.<span style="color:#a6e22e">of</span>(<span style="color:#66d9ef">null</span>)));
 </span></span></code></pre></div><p>Next get the <code>AccessibleObject.setAccessible0</code> method using reflections.</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span>Method setAccessible0Method;
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-java" data-lang="java"><span style="display:flex;"><span>Method setAccessible0Method;
 </span></span><span style="display:flex;"><span><span style="color:#66d9ef">try</span> {
 </span></span><span style="display:flex;"><span>  String setAccessible0MethodName <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;setAccessible0&#34;</span>;
 </span></span><span style="display:flex;"><span>  Class<span style="color:#f92672">[]</span> paramTypes <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> Class<span style="color:#f92672">[</span>2<span style="color:#f92672">]</span>;
@@ -377,7 +377,7 @@
 </span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">throw</span> <span style="color:#66d9ef">new</span> RuntimeException(e);
 </span></span><span style="display:flex;"><span>}
 </span></span></code></pre></div><p>With those two pieces we can now build the Byte Buddy transformer to match on the <code>setAccessible</code> method and to delegate to the stub and chain to the <code>setAccessible0</code> method.</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span>AgentBuilder.<span style="color:#a6e22e">Transformer</span> transformer <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> AgentBuilder.<span style="color:#a6e22e">Transformer</span>() {
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-java" data-lang="java"><span style="display:flex;"><span>AgentBuilder.<span style="color:#a6e22e">Transformer</span> transformer <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> AgentBuilder.<span style="color:#a6e22e">Transformer</span>() {
 </span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">@Override</span>
 </span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">public</span> DynamicType.<span style="color:#a6e22e">Builder</span><span style="color:#f92672">&lt;?&gt;</span> transform(
 </span></span><span style="display:flex;"><span>      DynamicType.<span style="color:#a6e22e">Builder</span><span style="color:#f92672">&lt;?&gt;</span> builder,
@@ -394,7 +394,7 @@
 </span></span><span style="display:flex;"><span>}
 </span></span></code></pre></div><p>That will take care of replacing the default implementation of <code>setAccessible</code> with our custom implementation and chain to the <code>setAccessible0</code> method if permission is granted. If an exception occurs, for instance due to permissions not being granted, the chained transformation will exit early avoiding the call to actually change the accessibility.</p>
 <p>The final step is to install Byte Buddy as a Java agent and actually perform the transformation. With a SecurityManager installed and this transformation executed, you can now run untrusted code with permissions to modify the accessibility of its own classes and methods, but not standard Java, your own runtime jar or other isolated code.</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span>Instrumentation instrumentation <span style="color:#f92672">=</span> ByteBuddyAgent.<span style="color:#a6e22e">install</span>();
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-java" data-lang="java"><span style="display:flex;"><span>Instrumentation instrumentation <span style="color:#f92672">=</span> ByteBuddyAgent.<span style="color:#a6e22e">install</span>();
 </span></span><span style="display:flex;"><span><span style="color:#75715e">// Append the jar containing the stub replacement to the bootstrap classpath</span>
 </span></span><span style="display:flex;"><span>instrumentation.<span style="color:#a6e22e">appendToBootstrapClassLoaderSearch</span>(jarFile);
 </span></span><span style="display:flex;"><span>

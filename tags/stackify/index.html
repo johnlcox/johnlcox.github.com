@@ -5,7 +5,7 @@
   <meta http-equiv="content-type" content="text/html; charset=utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description" content="">
-  <meta name="generator" content="Hugo 0.124.1">
+  <meta name="generator" content="Hugo 0.163.3">
 
   <title>Stackify &middot; Ideas on Software Engineering</title>
 
@@ -225,7 +225,7 @@
 
   <div>
   <div class="small-print">
-    <small>&copy; 2012 - 2020 John Leacox. All rights reserved.</small>
+    <small>&copy; 2012 - 2026 John Leacox. All rights reserved.</small>
   </div>
   
 </div>
@@ -282,7 +282,7 @@
   </header>
 
   <p>
-  A lot of server software runs on Java, but the different Java processes are listed as simply Java via commands like top or ps -ef. One feature of the Stackify agent is tracking the running processes on a server. I needed a way to identify what each Java process really was in a fairly simple and concise way, but there isn’t a clear winner in the output of the top or ps commands.
+  <p>A lot of server software runs on Java, but the different Java processes are listed as simply <code>Java</code> via commands like <code>top</code> or <code>ps -ef</code>. One feature of the <a href="http://www.stackify.com">Stackify</a> agent is tracking the running processes on a server. I needed a way to identify what each Java process really was in a fairly simple and concise way, but there isn’t a clear winner in the output of the top or ps commands.</p>
   </p>
 
   
@@ -333,7 +333,7 @@
   </header>
 
   <p>
-  A good Linux init script that works across multiple distros is hard to find. Most distros have a sample/skeleton init script to base your own init scripts on, but that requires having a separate init script for each distro. For the Stackify Linux agent I wanted to have a single init script that would work on all common Linux distros. I had a decent init script that worked pretty well for &lsquo;start&rsquo; and &lsquo;stop&rsquo; commands, but not so much for &lsquo;status&rsquo;.
+  <p>A good Linux init script that works across multiple distros is hard to find.  Most distros have a sample/skeleton init script to base your own init scripts on, but that requires having a separate init script for each distro.  For the <a href="http://www.stackify.com">Stackify</a> Linux agent I wanted to have  a single init script that would work on all common Linux distros.  I had a decent init script that worked pretty well for &lsquo;start&rsquo; and &lsquo;stop&rsquo; commands, but not so much for &lsquo;status&rsquo;.  The &lsquo;status&rsquo; command worked on my development machine (<a href="http://www.ubuntu.com">Ubuntu</a>) but didn&rsquo;t work on the other distros I was testing on (<a href="http://www.centos.org/">CentOS</a>/<a href="http://www.redhat.com/">Redhat</a>/<a href="https://aws.amazon.com/amis?platform=Amazon+Linux&amp;selection=platform">Amazon</a>).</p>
   </p>
 
   

@@ -5,7 +5,7 @@
   <meta http-equiv="content-type" content="text/html; charset=utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description" content="">
-  <meta name="generator" content="Hugo 0.124.1">
+  <meta name="generator" content="Hugo 0.163.3">
 
   <title>A Safer Way To Create Java Subprocesses &middot; Ideas on Software Engineering</title>
 
@@ -225,7 +225,7 @@
 
   <div>
   <div class="small-print">
-    <small>&copy; 2012 - 2020 John Leacox. All rights reserved.</small>
+    <small>&copy; 2012 - 2026 John Leacox. All rights reserved.</small>
   </div>
   
 </div>
@@ -275,13 +275,13 @@
 <p>For the two remaining pitfalls the problem of process grandchildren not being kill when a subprocess is killed cannot be remedied via code, so that will still require user knowledge to avoid. As for the prompt consumption of subprocess output, I didn&rsquo;t have an immediate need for discarding the output, so the initial version of process-warden doesn&rsquo;t provide any functionality for consuming the output. In a future release I hope to add a class that will silently consume the output and error streams along with a method on FinalizedProcessBuilder to enable the silent consumption.</p>
 <p>So how do you use process-warden? It&rsquo;s easy.</p>
 <p>Add it to your maven project:</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-xml" data-lang="xml"><span style="display:flex;"><span><span style="color:#f92672">&lt;dependency&gt;</span>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-xml" data-lang="xml"><span style="display:flex;"><span><span style="color:#f92672">&lt;dependency&gt;</span>
 </span></span><span style="display:flex;"><span>	<span style="color:#f92672">&lt;groupId&gt;</span>com.leacox.process<span style="color:#f92672">&lt;/groupId&gt;</span>
 </span></span><span style="display:flex;"><span>	<span style="color:#f92672">&lt;artifactId&gt;</span>process−warden<span style="color:#f92672">&lt;artifactId&gt;</span>
 </span></span><span style="display:flex;"><span>	<span style="color:#f92672">&lt;version&gt;</span>1.0.0<span style="color:#f92672">&lt;/version&gt;</span>
 </span></span><span style="display:flex;"><span><span style="color:#f92672">&lt;/dependency&gt;</span>
 </span></span></code></pre></div><p>Use FinalizedProcessBuilder to create a FinalizedProcess to execute:</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span><span style="color:#75715e">// With Java 7</span>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-java" data-lang="java"><span style="display:flex;"><span><span style="color:#75715e">// With Java 7</span>
 </span></span><span style="display:flex;"><span>FinalizedProcessBuilder pb <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> FinalizedProcessBuilder(<span style="color:#e6db74">&#34;myCommand&#34;</span>, <span style="color:#e6db74">&#34;myArg&#34;</span>);
 </span></span><span style="display:flex;"><span><span style="color:#66d9ef">try</span> (FinalizedProcess process <span style="color:#f92672">=</span> pb.<span style="color:#a6e22e">start</span>()) {
 </span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">int</span> returnVal <span style="color:#f92672">=</span> process.<span style="color:#a6e22e">waitFor</span>(5000); <span style="color:#75715e">// 5 second timeout</span>
