@@ -15,6 +15,43 @@
   <meta http-equiv="content-type" content="text/html; charset=utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description" content="">
+  
+<meta property="og:title" content="Implementing Scala-like Pattern Matching in Java 8">
+<meta property="og:description" content="I’ve been writing Scala off and on for the last several years. I took both of the Scala courses on Coursera and really enjoyed them. However, I still write a lot of Java. There are a lot of Scala …">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://john.leacox.com/posts/implementing-scala-like-pattern-matching-in-java-8/">
+<meta property="og:site_name" content="Ideas on Software Engineering">
+<meta property="og:image" content="https://s.gravatar.com/avatar/c268064d396bb4bafd31090d029bd8df?s=400">
+<meta property="article:published_time" content="2015-08-13T00:00:00Z">
+<meta property="article:modified_time" content="2015-08-13T00:00:00Z">
+
+
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:site" content="@johnlcox">
+<meta name="twitter:creator" content="@johnlcox">
+<meta name="twitter:title" content="Implementing Scala-like Pattern Matching in Java 8">
+<meta name="twitter:description" content="I’ve been writing Scala off and on for the last several years. I took both of the Scala courses on Coursera and really enjoyed them. However, I still write a lot of Java. There are a lot of Scala …">
+<meta name="twitter:image" content="https://s.gravatar.com/avatar/c268064d396bb4bafd31090d029bd8df?s=400"><script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "author": {
+    "@type": "Person",
+    "name": "John Leacox"
+  },
+  "dateModified": "2015-08-13T00:00:00Z",
+  "datePublished": "2015-08-13T00:00:00Z",
+  "description": "I’ve been writing Scala off and on for the last several years. I took both of the Scala courses on Coursera and really enjoyed them. However, I still write a lot of Java. There are a lot of Scala …",
+  "headline": "Implementing Scala-like Pattern Matching in Java 8",
+  "image": "https://s.gravatar.com/avatar/c268064d396bb4bafd31090d029bd8df?s=400",
+  "mainEntityOfPage": "https://john.leacox.com/posts/implementing-scala-like-pattern-matching-in-java-8/",
+  "publisher": {
+    "@type": "Organization",
+    "name": "Ideas on Software Engineering"
+  }
+}
+</script>
+
   <meta name="generator" content="Hugo 0.163.3">
 
   <title>Implementing Scala-like Pattern Matching in Java 8 &middot; Ideas on Software Engineering</title>
@@ -51,18 +88,12 @@
   
   <link href="https://fonts.googleapis.com/css?family=Raleway" rel="stylesheet" type="text/css">
 
-  
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-
  
   
 
   
-  <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.17.1/styles/solarized-dark.min.css">
-  <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.17.1/highlight.min.js"></script>
-  
-  <script>hljs.initHighlightingOnLoad();</script>
-  
+  <link rel="stylesheet" href="https://john.leacox.com/css/chroma-light.css">
+  <link rel="stylesheet" href="https://john.leacox.com/css/chroma-dark.css">
 
   <link rel="shortcut icon" href="https://john.leacox.com/img/favicon.ico" type="image/x-icon" />
 
@@ -305,19 +336,19 @@
 <p>The expressions library pattern matching was closer to what I had in mind. It can extract top-level and nested values, but it requires implementing a &lsquo;constructor&rsquo; method for anything you want to match on and doesn&rsquo;t built-in matching for things like <code>Optional</code> or <code>List</code>. At this point I decided I&rsquo;d give a shot at implementing pattern matching in Java 8 that is as close to the Scala pattern matching as possible. I like to try to come up with a good name for my projects, so I spent some time with a thesaurus looking for words related to &lsquo;matching&rsquo; and &lsquo;patterns&rsquo;, and I eventually landed on <a href="http://dictionary.reference.com/browse/motif">motif</a>.</p>
 <p>Before I go into some details about the process of implementing motif, below are some examples of what code using motif might look like.</p>
 <p>Matching on Optional:</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-java" data-lang="java"><span style="display:flex;"><span>Optional<span style="color:#f92672">&lt;</span>Person<span style="color:#f92672">&gt;</span> personOpt <span style="color:#f92672">=</span> getPerson();
-</span></span><span style="display:flex;"><span>match(personOpt)
-</span></span><span style="display:flex;"><span>    .<span style="color:#a6e22e">when</span>(some(any())).<span style="color:#a6e22e">then</span>(person <span style="color:#f92672">-&gt;</span> doStuff(person))
-</span></span><span style="display:flex;"><span>    .<span style="color:#a6e22e">when</span>(none()).<span style="color:#a6e22e">then</span>(() <span style="color:#f92672">-&gt;</span> System.<span style="color:#a6e22e">out</span>.<span style="color:#a6e22e">println</span>(<span style="color:#e6db74">&#34;Person not found&#34;</span>))
-</span></span><span style="display:flex;"><span>    .<span style="color:#a6e22e">doMatch</span>();
-</span></span></code></pre></div><p>Nested matching:</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-java" data-lang="java"><span style="display:flex;"><span>Optional<span style="color:#f92672">&lt;</span>Tuple2<span style="color:#f92672">&lt;</span>String, String<span style="color:#f92672">&gt;&gt;</span> opt <span style="color:#f92672">=</span> Optional.<span style="color:#a6e22e">of</span>(Tuple2.<span style="color:#a6e22e">of</span>(<span style="color:#e6db74">&#34;first&#34;</span>, <span style="color:#e6db74">&#34;second&#34;</span>));
-</span></span><span style="display:flex;"><span>match(opt)
-</span></span><span style="display:flex;"><span>    .<span style="color:#a6e22e">when</span>(some(tuple2(eq(<span style="color:#e6db74">&#34;third&#34;</span>), any()))).<span style="color:#a6e22e">then</span>(b <span style="color:#f92672">-&gt;</span> doStuff(b))
-</span></span><span style="display:flex;"><span>    .<span style="color:#a6e22e">when</span>(some(tuple2(any(), eq(<span style="color:#e6db74">&#34;second&#34;</span>)))).<span style="color:#a6e22e">then</span>(a <span style="color:#f92672">-&gt;</span> doStuff(a))
-</span></span><span style="display:flex;"><span>    .<span style="color:#a6e22e">when</span>(none()).<span style="color:#a6e22e">then</span>(() <span style="color:#f92672">-&gt;</span> System.<span style="color:#a6e22e">out</span>.<span style="color:#a6e22e">println</span>(<span style="color:#e6db74">&#34;Tuple not found&#34;</span>))
-</span></span><span style="display:flex;"><span>    .<span style="color:#a6e22e">doMatch</span>();
-</span></span></code></pre></div><p>Checkout the <a href="http://john.leacox.com/motif/">Github page</a> or <a href="https://github.com/johnlcox/motif">Github repo</a> for additional details. Version 0.1 of motif is available from maven central. It is a little more verbose (horizontally) than Scala, but it provides much of the same functionality. Currently, it supports extracting a maximum of 3 parameters, whereas Scala supports up to 22 in 2.10 and possibly unlimited in 2.11+? I&rsquo;ve rarely found myself needing to extract more than 3 parameters in Scala, so I thought this would be an OK limitation for now. Support for additional parameters could be added in the future, but it will require writing additional code generation logic.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl"><span class="n">Optional</span><span class="o">&lt;</span><span class="n">Person</span><span class="o">&gt;</span><span class="w"> </span><span class="n">personOpt</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">getPerson</span><span class="p">();</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="n">match</span><span class="p">(</span><span class="n">personOpt</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="p">.</span><span class="na">when</span><span class="p">(</span><span class="n">some</span><span class="p">(</span><span class="n">any</span><span class="p">())).</span><span class="na">then</span><span class="p">(</span><span class="n">person</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">doStuff</span><span class="p">(</span><span class="n">person</span><span class="p">))</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="p">.</span><span class="na">when</span><span class="p">(</span><span class="n">none</span><span class="p">()).</span><span class="na">then</span><span class="p">(()</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">System</span><span class="p">.</span><span class="na">out</span><span class="p">.</span><span class="na">println</span><span class="p">(</span><span class="s">&#34;Person not found&#34;</span><span class="p">))</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="p">.</span><span class="na">doMatch</span><span class="p">();</span><span class="w">
+</span></span></span></code></pre></div><p>Nested matching:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl"><span class="n">Optional</span><span class="o">&lt;</span><span class="n">Tuple2</span><span class="o">&lt;</span><span class="n">String</span><span class="p">,</span><span class="w"> </span><span class="n">String</span><span class="o">&gt;&gt;</span><span class="w"> </span><span class="n">opt</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Optional</span><span class="p">.</span><span class="na">of</span><span class="p">(</span><span class="n">Tuple2</span><span class="p">.</span><span class="na">of</span><span class="p">(</span><span class="s">&#34;first&#34;</span><span class="p">,</span><span class="w"> </span><span class="s">&#34;second&#34;</span><span class="p">));</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="n">match</span><span class="p">(</span><span class="n">opt</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="p">.</span><span class="na">when</span><span class="p">(</span><span class="n">some</span><span class="p">(</span><span class="n">tuple2</span><span class="p">(</span><span class="n">eq</span><span class="p">(</span><span class="s">&#34;third&#34;</span><span class="p">),</span><span class="w"> </span><span class="n">any</span><span class="p">()))).</span><span class="na">then</span><span class="p">(</span><span class="n">b</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">doStuff</span><span class="p">(</span><span class="n">b</span><span class="p">))</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="p">.</span><span class="na">when</span><span class="p">(</span><span class="n">some</span><span class="p">(</span><span class="n">tuple2</span><span class="p">(</span><span class="n">any</span><span class="p">(),</span><span class="w"> </span><span class="n">eq</span><span class="p">(</span><span class="s">&#34;second&#34;</span><span class="p">)))).</span><span class="na">then</span><span class="p">(</span><span class="n">a</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">doStuff</span><span class="p">(</span><span class="n">a</span><span class="p">))</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="p">.</span><span class="na">when</span><span class="p">(</span><span class="n">none</span><span class="p">()).</span><span class="na">then</span><span class="p">(()</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">System</span><span class="p">.</span><span class="na">out</span><span class="p">.</span><span class="na">println</span><span class="p">(</span><span class="s">&#34;Tuple not found&#34;</span><span class="p">))</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="p">.</span><span class="na">doMatch</span><span class="p">();</span><span class="w">
+</span></span></span></code></pre></div><p>Checkout the <a href="http://john.leacox.com/motif/">Github page</a> or <a href="https://github.com/johnlcox/motif">Github repo</a> for additional details. Version 0.1 of motif is available from maven central. It is a little more verbose (horizontally) than Scala, but it provides much of the same functionality. Currently, it supports extracting a maximum of 3 parameters, whereas Scala supports up to 22 in 2.10 and possibly unlimited in 2.11+? I&rsquo;ve rarely found myself needing to extract more than 3 parameters in Scala, so I thought this would be an OK limitation for now. Support for additional parameters could be added in the future, but it will require writing additional code generation logic.</p>
 <p>Motif provides many useful pattern matchers out of the box, but it is also very extensible. A Guava extension could be created, for instance, that provides matchers for Guava&rsquo;s <code>Optional</code> and any other Guava concepts that would be useful to match on. The motif-generator project provides builders for generating matcher cases for extensions. <a href="https://github.com/johnlcox/motif/blob/master/generator/src/main/java/com/leacox/motif/cases/OptionalCasesGenerator.java">OptionalCasesGenerator</a> is a good example for using the generator.</p>
 <p>The implementation of the Motif pattern matching happened in three phases. The initial phase was a varargs method that accepted the matching cases, and automatically executed the matching. This ran into ambiguity issues for consumers of the code, so I ended up scrapping it and converting to a fluent interface. By using a fluent interface, I could use intermediate classes to track types and avoid ambiguity. This second phase led to what is essentially the final API, except without nested extraction. Once I saw that the fluent interface was working well, I added nested extraction as a third phase. The nested extraction leads to a bit of combinatorial explosion of the API, so I added code generation during this phase to reduce the likelyhood of errors and to avoid writing very similar code multiple times. The code generation portion, is a separate library, and makes it easy for third party extensions to generate all of the necessary methods needed.</p>
 <p>Motif has been released as version 0.1 and is available in Maven central. The API is pretty solid, and I don&rsquo;t expect any dramatic changes in the future. Give it a try in your Java 8 code.</p>
@@ -366,22 +397,6 @@
 </div>
 <script src="https://john.leacox.com/js/ui.js"></script>
 <script src="https://john.leacox.com/js/menus.js"></script>
-
-
-<script>
-  
-  if (window.location.hostname != "localhost") {
-    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
-    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
-    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
-    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
-
-    ga('create', 'UA-36983897-3', 'auto');
-    ga('send', 'pageview');
-  }
-</script>
-
-
 
 
 

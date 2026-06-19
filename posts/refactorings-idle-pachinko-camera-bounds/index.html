@@ -15,6 +15,43 @@
   <meta http-equiv="content-type" content="text/html; charset=utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description" content="">
+  
+<meta property="og:title" content="Refactorings: Idle Pachinko Camera Bounds">
+<meta property="og:description" content="I recently implemented a feature to put bounds on camera movement for the Idle Pachinko game that Matt Torres and I have been developing. When I write code, I typically write it in multiple passes …">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://john.leacox.com/posts/refactorings-idle-pachinko-camera-bounds/">
+<meta property="og:site_name" content="Ideas on Software Engineering">
+<meta property="og:image" content="https://s.gravatar.com/avatar/c268064d396bb4bafd31090d029bd8df?s=400">
+<meta property="article:published_time" content="2020-04-30T00:00:00Z">
+<meta property="article:modified_time" content="2020-04-30T00:00:00Z">
+
+
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:site" content="@johnlcox">
+<meta name="twitter:creator" content="@johnlcox">
+<meta name="twitter:title" content="Refactorings: Idle Pachinko Camera Bounds">
+<meta name="twitter:description" content="I recently implemented a feature to put bounds on camera movement for the Idle Pachinko game that Matt Torres and I have been developing. When I write code, I typically write it in multiple passes …">
+<meta name="twitter:image" content="https://s.gravatar.com/avatar/c268064d396bb4bafd31090d029bd8df?s=400"><script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "author": {
+    "@type": "Person",
+    "name": "John Leacox"
+  },
+  "dateModified": "2020-04-30T00:00:00Z",
+  "datePublished": "2020-04-30T00:00:00Z",
+  "description": "I recently implemented a feature to put bounds on camera movement for the Idle Pachinko game that Matt Torres and I have been developing. When I write code, I typically write it in multiple passes …",
+  "headline": "Refactorings: Idle Pachinko Camera Bounds",
+  "image": "https://s.gravatar.com/avatar/c268064d396bb4bafd31090d029bd8df?s=400",
+  "mainEntityOfPage": "https://john.leacox.com/posts/refactorings-idle-pachinko-camera-bounds/",
+  "publisher": {
+    "@type": "Organization",
+    "name": "Ideas on Software Engineering"
+  }
+}
+</script>
+
   <meta name="generator" content="Hugo 0.163.3">
 
   <title>Refactorings: Idle Pachinko Camera Bounds &middot; Ideas on Software Engineering</title>
@@ -51,18 +88,12 @@
   
   <link href="https://fonts.googleapis.com/css?family=Raleway" rel="stylesheet" type="text/css">
 
-  
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-
  
   
 
   
-  <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.17.1/styles/solarized-dark.min.css">
-  <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.17.1/highlight.min.js"></script>
-  
-  <script>hljs.initHighlightingOnLoad();</script>
-  
+  <link rel="stylesheet" href="https://john.leacox.com/css/chroma-light.css">
+  <link rel="stylesheet" href="https://john.leacox.com/css/chroma-dark.css">
 
   <link rel="shortcut icon" href="https://john.leacox.com/img/favicon.ico" type="image/x-icon" />
 
@@ -299,115 +330,115 @@
 
   <p>I recently implemented a feature to put bounds on camera movement for the Idle Pachinko game that Matt Torres and I have been developing. When I write code, I typically write it in multiple passes like how an author of a paper or a book takes multiple editing passes over their text. Below is the code for the camera bounds feature in multiple passes, showing how I improved the quality and understandability of the code before opening a pull request and calling it done.</p>
 <p>In this game the camera can only move up and down; it is locked to 0 on the x-axis. We have a top and a bottom boundary for the game area that we want to lock the camera to when scrolling/moving the camera up and down. The top and bottom boundary values are encapsulated by the <code>GameBoundaries</code> class which is used by this camera system to enforce the boundaries on the camera position.</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-csharp" data-lang="csharp"><span style="display:flex;"><span><span style="color:#66d9ef">using</span> EcsRx.Events;
-</span></span><span style="display:flex;"><span><span style="color:#66d9ef">using</span> EcsRx.Plugins.ReactiveSystems.Custom;
-</span></span><span style="display:flex;"><span><span style="color:#66d9ef">using</span> MisfitLabs.IdlePachinko.InGame.Events;
-</span></span><span style="display:flex;"><span><span style="color:#66d9ef">using</span> UnityEngine;
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">CameraMovementSystem</span> : EventReactionSystem&lt;ScreenDraggedEvent&gt;
-</span></span><span style="display:flex;"><span>{
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">const</span> <span style="color:#66d9ef">float</span> DragSpeed = <span style="color:#ae81ff">1.5f</span>;
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">readonly</span> Camera _camera;
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">readonly</span> GameBoundaries _gameBoundaries;
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">public</span> CameraMovementSystem(Camera camera, GameBoundaries gameBoundaries, IEventSystem eventSystem)
-</span></span><span style="display:flex;"><span>        : <span style="color:#66d9ef">base</span>(eventSystem)
-</span></span><span style="display:flex;"><span>    {
-</span></span><span style="display:flex;"><span>        _camera = camera;
-</span></span><span style="display:flex;"><span>        _gameBoundaries = gameBoundaries;
-</span></span><span style="display:flex;"><span>    }
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> EventTriggered(ScreenDraggedEvent eventData)
-</span></span><span style="display:flex;"><span>    {
-</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">var</span> newPosition = _camera.transform.position + <span style="color:#66d9ef">new</span> Vector3(<span style="color:#ae81ff">0.0f</span>, -eventData.DeltaY * DragSpeed, <span style="color:#ae81ff">0.0f</span>);
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">var</span> orthographicSize = _camera.orthographicSize;
-</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">var</span> maxY = _gameBoundaries.Top - orthographicSize;
-</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">var</span> minY = _gameBoundaries.Bottom + orthographicSize;
-</span></span><span style="display:flex;"><span>        newPosition.y = Mathf.Clamp(newPosition.y, minY, maxY);
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>        _camera.transform.position = newPosition;
-</span></span><span style="display:flex;"><span>    }
-</span></span><span style="display:flex;"><span>}
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-csharp" data-lang="csharp"><span class="line"><span class="cl"><span class="k">using</span> <span class="nn">EcsRx.Events</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="k">using</span> <span class="nn">EcsRx.Plugins.ReactiveSystems.Custom</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="k">using</span> <span class="nn">MisfitLabs.IdlePachinko.InGame.Events</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="k">using</span> <span class="nn">UnityEngine</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kd">public</span> <span class="k">class</span> <span class="nc">CameraMovementSystem</span> <span class="p">:</span> <span class="n">EventReactionSystem</span><span class="p">&lt;</span><span class="n">ScreenDraggedEvent</span><span class="p">&gt;</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="kd">private</span> <span class="kd">const</span> <span class="kt">float</span> <span class="n">DragSpeed</span> <span class="p">=</span> <span class="m">1.5f</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="kd">private</span> <span class="k">readonly</span> <span class="n">Camera</span> <span class="n">_camera</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="kd">private</span> <span class="k">readonly</span> <span class="n">GameBoundaries</span> <span class="n">_gameBoundaries</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="kd">public</span> <span class="n">CameraMovementSystem</span><span class="p">(</span><span class="n">Camera</span> <span class="n">camera</span><span class="p">,</span> <span class="n">GameBoundaries</span> <span class="n">gameBoundaries</span><span class="p">,</span> <span class="n">IEventSystem</span> <span class="n">eventSystem</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">        <span class="p">:</span> <span class="k">base</span><span class="p">(</span><span class="n">eventSystem</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="n">_camera</span> <span class="p">=</span> <span class="n">camera</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="n">_gameBoundaries</span> <span class="p">=</span> <span class="n">gameBoundaries</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="kd">public</span> <span class="k">void</span> <span class="n">EventTriggered</span><span class="p">(</span><span class="n">ScreenDraggedEvent</span> <span class="n">eventData</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="kt">var</span> <span class="n">newPosition</span> <span class="p">=</span> <span class="n">_camera</span><span class="p">.</span><span class="n">transform</span><span class="p">.</span><span class="n">position</span> <span class="p">+</span> <span class="k">new</span> <span class="n">Vector3</span><span class="p">(</span><span class="m">0.0f</span><span class="p">,</span> <span class="p">-</span><span class="n">eventData</span><span class="p">.</span><span class="n">DeltaY</span> <span class="p">*</span> <span class="n">DragSpeed</span><span class="p">,</span> <span class="m">0.0f</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="kt">var</span> <span class="n">orthographicSize</span> <span class="p">=</span> <span class="n">_camera</span><span class="p">.</span><span class="n">orthographicSize</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="kt">var</span> <span class="n">maxY</span> <span class="p">=</span> <span class="n">_gameBoundaries</span><span class="p">.</span><span class="n">Top</span> <span class="p">-</span> <span class="n">orthographicSize</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="kt">var</span> <span class="n">minY</span> <span class="p">=</span> <span class="n">_gameBoundaries</span><span class="p">.</span><span class="n">Bottom</span> <span class="p">+</span> <span class="n">orthographicSize</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="n">newPosition</span><span class="p">.</span><span class="n">y</span> <span class="p">=</span> <span class="n">Mathf</span><span class="p">.</span><span class="n">Clamp</span><span class="p">(</span><span class="n">newPosition</span><span class="p">.</span><span class="n">y</span><span class="p">,</span> <span class="n">minY</span><span class="p">,</span> <span class="n">maxY</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="n">_camera</span><span class="p">.</span><span class="n">transform</span><span class="p">.</span><span class="n">position</span> <span class="p">=</span> <span class="n">newPosition</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
 </span></span></code></pre></div><p>While the above code works, there is a lot going on in the <code>EventTriggered</code> method. All the different calculations for moving the camera and locking it into the bounds happens here. Splitting some things out into private methods with good names will enhance the readability of this class.</p>
 <p>Since this was a new feature to the existing <code>CameraMovementSystem</code> that adding boundary enforcement, I first split out that enforcement into the method <code>ClampToGameBoundaries</code>. Now rather than needing to read the 4 lines that do the boundary enforcement and interpret what they are doing we can read the name of this function and it is immediately clear what it is doing. We can still jump into the new method to see how it is doing the enforcement. It is often good to separate the &ldquo;what&rdquo; from the &ldquo;how&rdquo;.</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-csharp" data-lang="csharp"><span style="display:flex;"><span><span style="color:#66d9ef">using</span> EcsRx.Events;
-</span></span><span style="display:flex;"><span><span style="color:#66d9ef">using</span> EcsRx.Plugins.ReactiveSystems.Custom;
-</span></span><span style="display:flex;"><span><span style="color:#66d9ef">using</span> MisfitLabs.IdlePachinko.InGame.Events;
-</span></span><span style="display:flex;"><span><span style="color:#66d9ef">using</span> UnityEngine;
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">CameraMovementSystem</span> : EventReactionSystem&lt;ScreenDraggedEvent&gt;
-</span></span><span style="display:flex;"><span>{
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">const</span> <span style="color:#66d9ef">float</span> DragSpeed = <span style="color:#ae81ff">1.5f</span>;
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">readonly</span> Camera _camera;
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">readonly</span> GameBoundaries _gameBoundaries;
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">public</span> CameraMovementSystem(Camera camera, GameBoundaries gameBoundaries, IEventSystem eventSystem)
-</span></span><span style="display:flex;"><span>        : <span style="color:#66d9ef">base</span>(eventSystem)
-</span></span><span style="display:flex;"><span>    {
-</span></span><span style="display:flex;"><span>        _camera = camera;
-</span></span><span style="display:flex;"><span>        _gameBoundaries = gameBoundaries;
-</span></span><span style="display:flex;"><span>    }
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">override</span> <span style="color:#66d9ef">void</span> EventTriggered(ScreenDraggedEvent eventData)
-</span></span><span style="display:flex;"><span>    {
-</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">var</span> newPosition = _camera.transform.position + <span style="color:#66d9ef">new</span> Vector3(<span style="color:#ae81ff">0.0f</span>, -eventData.DeltaY * DragSpeed, <span style="color:#ae81ff">0.0f</span>);
-</span></span><span style="display:flex;"><span>        _camera.transform.position = ClampToGameBoundaries(newPosition);;
-</span></span><span style="display:flex;"><span>    }
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">private</span> Vector3 ClampToGameBoundaries(Vector2 position)
-</span></span><span style="display:flex;"><span>    {
-</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">var</span> orthographicSize = _camera.orthographicSize;
-</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">var</span> maxY = _gameBoundaries.Top - orthographicSize;
-</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">var</span> minY = _gameBoundaries.Bottom + orthographicSize;
-</span></span><span style="display:flex;"><span>        position.y = Mathf.Clamp(position.y, minY, maxY);
-</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> position;
-</span></span><span style="display:flex;"><span>    }
-</span></span><span style="display:flex;"><span>}
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-csharp" data-lang="csharp"><span class="line"><span class="cl"><span class="k">using</span> <span class="nn">EcsRx.Events</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="k">using</span> <span class="nn">EcsRx.Plugins.ReactiveSystems.Custom</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="k">using</span> <span class="nn">MisfitLabs.IdlePachinko.InGame.Events</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="k">using</span> <span class="nn">UnityEngine</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kd">public</span> <span class="k">class</span> <span class="nc">CameraMovementSystem</span> <span class="p">:</span> <span class="n">EventReactionSystem</span><span class="p">&lt;</span><span class="n">ScreenDraggedEvent</span><span class="p">&gt;</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="kd">private</span> <span class="kd">const</span> <span class="kt">float</span> <span class="n">DragSpeed</span> <span class="p">=</span> <span class="m">1.5f</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="kd">private</span> <span class="k">readonly</span> <span class="n">Camera</span> <span class="n">_camera</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="kd">private</span> <span class="k">readonly</span> <span class="n">GameBoundaries</span> <span class="n">_gameBoundaries</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="kd">public</span> <span class="n">CameraMovementSystem</span><span class="p">(</span><span class="n">Camera</span> <span class="n">camera</span><span class="p">,</span> <span class="n">GameBoundaries</span> <span class="n">gameBoundaries</span><span class="p">,</span> <span class="n">IEventSystem</span> <span class="n">eventSystem</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">        <span class="p">:</span> <span class="k">base</span><span class="p">(</span><span class="n">eventSystem</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="n">_camera</span> <span class="p">=</span> <span class="n">camera</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="n">_gameBoundaries</span> <span class="p">=</span> <span class="n">gameBoundaries</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="kd">public</span> <span class="kd">override</span> <span class="k">void</span> <span class="n">EventTriggered</span><span class="p">(</span><span class="n">ScreenDraggedEvent</span> <span class="n">eventData</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="kt">var</span> <span class="n">newPosition</span> <span class="p">=</span> <span class="n">_camera</span><span class="p">.</span><span class="n">transform</span><span class="p">.</span><span class="n">position</span> <span class="p">+</span> <span class="k">new</span> <span class="n">Vector3</span><span class="p">(</span><span class="m">0.0f</span><span class="p">,</span> <span class="p">-</span><span class="n">eventData</span><span class="p">.</span><span class="n">DeltaY</span> <span class="p">*</span> <span class="n">DragSpeed</span><span class="p">,</span> <span class="m">0.0f</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="n">_camera</span><span class="p">.</span><span class="n">transform</span><span class="p">.</span><span class="n">position</span> <span class="p">=</span> <span class="n">ClampToGameBoundaries</span><span class="p">(</span><span class="n">newPosition</span><span class="p">);;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="kd">private</span> <span class="n">Vector3</span> <span class="n">ClampToGameBoundaries</span><span class="p">(</span><span class="n">Vector2</span> <span class="n">position</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="kt">var</span> <span class="n">orthographicSize</span> <span class="p">=</span> <span class="n">_camera</span><span class="p">.</span><span class="n">orthographicSize</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="kt">var</span> <span class="n">maxY</span> <span class="p">=</span> <span class="n">_gameBoundaries</span><span class="p">.</span><span class="n">Top</span> <span class="p">-</span> <span class="n">orthographicSize</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="kt">var</span> <span class="n">minY</span> <span class="p">=</span> <span class="n">_gameBoundaries</span><span class="p">.</span><span class="n">Bottom</span> <span class="p">+</span> <span class="n">orthographicSize</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="n">position</span><span class="p">.</span><span class="n">y</span> <span class="p">=</span> <span class="n">Mathf</span><span class="p">.</span><span class="n">Clamp</span><span class="p">(</span><span class="n">position</span><span class="p">.</span><span class="n">y</span><span class="p">,</span> <span class="n">minY</span><span class="p">,</span> <span class="n">maxY</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="n">position</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
 </span></span></code></pre></div><p>After the 2nd pass there are still a couple things that stick out to me. The first is the <code>orthagraphicSize</code> value. What is that? It is half the camera&rsquo;s height, which we need to enforce the boundary since the camera position is the center point, but we want to make sure the camera edge does not go passed the boundaries. I spent some time trying to name it better, but ultimately decided to leave it as is. The documentation from Unity3D &ndash; &ldquo;Camera&rsquo;s half-size when in orthographic mode.&rdquo; &ndash; is quite clear and sometimes it is best to stick with the naming of the libraries you are using.</p>
 <p>The second thing that sticks out to me is that there is still quite a bit of unnamed calculation happening in the <code>EventTriggered</code> method. To address this, I split out the camera new position dragging into a new method <code>CalculateNewPosition</code> and split it into 2 lines so that each step of the calculation is named &ndash; The move delta and then the new position.</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-csharp" data-lang="csharp"><span style="display:flex;"><span><span style="color:#66d9ef">using</span> EcsRx.Events;
-</span></span><span style="display:flex;"><span><span style="color:#66d9ef">using</span> EcsRx.Plugins.ReactiveSystems.Custom;
-</span></span><span style="display:flex;"><span><span style="color:#66d9ef">using</span> MisfitLabs.IdlePachinko.InGame.Events;
-</span></span><span style="display:flex;"><span><span style="color:#66d9ef">using</span> UnityEngine;
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">CameraMovementSystem</span> : EventReactionSystem&lt;ScreenDraggedEvent&gt;
-</span></span><span style="display:flex;"><span>{
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">const</span> <span style="color:#66d9ef">float</span> DragSpeed = <span style="color:#ae81ff">1.5f</span>;
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">readonly</span> Camera _camera;
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">readonly</span> GameBoundaries _gameBoundaries;
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">public</span> CameraMovementSystem(Camera camera, GameBoundaries gameBoundaries, IEventSystem eventSystem)
-</span></span><span style="display:flex;"><span>        : <span style="color:#66d9ef">base</span>(eventSystem)
-</span></span><span style="display:flex;"><span>    {
-</span></span><span style="display:flex;"><span>        _camera = camera;
-</span></span><span style="display:flex;"><span>        _gameBoundaries = gameBoundaries;
-</span></span><span style="display:flex;"><span>    }
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">override</span> <span style="color:#66d9ef">void</span> EventTriggered(ScreenDraggedEvent eventData)
-</span></span><span style="display:flex;"><span>    {
-</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">var</span> newPosition = CalculateNewPosition(eventData);
-</span></span><span style="display:flex;"><span>        _camera.transform.position = ClampToGameBoundaries(newPosition);
-</span></span><span style="display:flex;"><span>    }
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">private</span> Vector3 CalculateNewPosition(ScreenDraggedEvent eventData)
-</span></span><span style="display:flex;"><span>    {
-</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">var</span> moveDelta = <span style="color:#66d9ef">new</span> Vector3(<span style="color:#ae81ff">0.0f</span>, -eventData.DeltaY * DragSpeed, <span style="color:#ae81ff">0.0f</span>);
-</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> _camera.transform.position + moveDelta;
-</span></span><span style="display:flex;"><span>    }
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">private</span> Vector3 ClampToGameBoundaries(Vector3 position)
-</span></span><span style="display:flex;"><span>    {
-</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">var</span> orthographicSize = _camera.orthographicSize;
-</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">var</span> maxY = _gameBoundaries.Top - orthographicSize;
-</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">var</span> minY = _gameBoundaries.Bottom + orthographicSize;
-</span></span><span style="display:flex;"><span>        position.y = Mathf.Clamp(position.y, minY, maxY);
-</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> position;
-</span></span><span style="display:flex;"><span>    }
-</span></span><span style="display:flex;"><span>}
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-csharp" data-lang="csharp"><span class="line"><span class="cl"><span class="k">using</span> <span class="nn">EcsRx.Events</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="k">using</span> <span class="nn">EcsRx.Plugins.ReactiveSystems.Custom</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="k">using</span> <span class="nn">MisfitLabs.IdlePachinko.InGame.Events</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="k">using</span> <span class="nn">UnityEngine</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kd">public</span> <span class="k">class</span> <span class="nc">CameraMovementSystem</span> <span class="p">:</span> <span class="n">EventReactionSystem</span><span class="p">&lt;</span><span class="n">ScreenDraggedEvent</span><span class="p">&gt;</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="kd">private</span> <span class="kd">const</span> <span class="kt">float</span> <span class="n">DragSpeed</span> <span class="p">=</span> <span class="m">1.5f</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="kd">private</span> <span class="k">readonly</span> <span class="n">Camera</span> <span class="n">_camera</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="kd">private</span> <span class="k">readonly</span> <span class="n">GameBoundaries</span> <span class="n">_gameBoundaries</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="kd">public</span> <span class="n">CameraMovementSystem</span><span class="p">(</span><span class="n">Camera</span> <span class="n">camera</span><span class="p">,</span> <span class="n">GameBoundaries</span> <span class="n">gameBoundaries</span><span class="p">,</span> <span class="n">IEventSystem</span> <span class="n">eventSystem</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">        <span class="p">:</span> <span class="k">base</span><span class="p">(</span><span class="n">eventSystem</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="n">_camera</span> <span class="p">=</span> <span class="n">camera</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="n">_gameBoundaries</span> <span class="p">=</span> <span class="n">gameBoundaries</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="kd">public</span> <span class="kd">override</span> <span class="k">void</span> <span class="n">EventTriggered</span><span class="p">(</span><span class="n">ScreenDraggedEvent</span> <span class="n">eventData</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="kt">var</span> <span class="n">newPosition</span> <span class="p">=</span> <span class="n">CalculateNewPosition</span><span class="p">(</span><span class="n">eventData</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="n">_camera</span><span class="p">.</span><span class="n">transform</span><span class="p">.</span><span class="n">position</span> <span class="p">=</span> <span class="n">ClampToGameBoundaries</span><span class="p">(</span><span class="n">newPosition</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="kd">private</span> <span class="n">Vector3</span> <span class="n">CalculateNewPosition</span><span class="p">(</span><span class="n">ScreenDraggedEvent</span> <span class="n">eventData</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="kt">var</span> <span class="n">moveDelta</span> <span class="p">=</span> <span class="k">new</span> <span class="n">Vector3</span><span class="p">(</span><span class="m">0.0f</span><span class="p">,</span> <span class="p">-</span><span class="n">eventData</span><span class="p">.</span><span class="n">DeltaY</span> <span class="p">*</span> <span class="n">DragSpeed</span><span class="p">,</span> <span class="m">0.0f</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="n">_camera</span><span class="p">.</span><span class="n">transform</span><span class="p">.</span><span class="n">position</span> <span class="p">+</span> <span class="n">moveDelta</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="kd">private</span> <span class="n">Vector3</span> <span class="n">ClampToGameBoundaries</span><span class="p">(</span><span class="n">Vector3</span> <span class="n">position</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="kt">var</span> <span class="n">orthographicSize</span> <span class="p">=</span> <span class="n">_camera</span><span class="p">.</span><span class="n">orthographicSize</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="kt">var</span> <span class="n">maxY</span> <span class="p">=</span> <span class="n">_gameBoundaries</span><span class="p">.</span><span class="n">Top</span> <span class="p">-</span> <span class="n">orthographicSize</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="kt">var</span> <span class="n">minY</span> <span class="p">=</span> <span class="n">_gameBoundaries</span><span class="p">.</span><span class="n">Bottom</span> <span class="p">+</span> <span class="n">orthographicSize</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="n">position</span><span class="p">.</span><span class="n">y</span> <span class="p">=</span> <span class="n">Mathf</span><span class="p">.</span><span class="n">Clamp</span><span class="p">(</span><span class="n">position</span><span class="p">.</span><span class="n">y</span><span class="p">,</span> <span class="n">minY</span><span class="p">,</span> <span class="n">maxY</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="n">position</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
 </span></span></code></pre></div>
   
   
@@ -447,22 +478,6 @@
 </div>
 <script src="https://john.leacox.com/js/ui.js"></script>
 <script src="https://john.leacox.com/js/menus.js"></script>
-
-
-<script>
-  
-  if (window.location.hostname != "localhost") {
-    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
-    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
-    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
-    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
-
-    ga('create', 'UA-36983897-3', 'auto');
-    ga('send', 'pageview');
-  }
-</script>
-
-
 
 
 

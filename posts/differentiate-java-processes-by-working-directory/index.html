@@ -15,6 +15,43 @@
   <meta http-equiv="content-type" content="text/html; charset=utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description" content="">
+  
+<meta property="og:title" content="Differentiate Java Processes by Working Directory">
+<meta property="og:description" content="A lot of server software runs on Java, but the different Java processes are listed as simply Java via commands like top or ps -ef. One feature of the Stackify agent is tracking the running processes …">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://john.leacox.com/posts/differentiate-java-processes-by-working-directory/">
+<meta property="og:site_name" content="Ideas on Software Engineering">
+<meta property="og:image" content="https://s.gravatar.com/avatar/c268064d396bb4bafd31090d029bd8df?s=400">
+<meta property="article:published_time" content="2013-02-17T00:00:00Z">
+<meta property="article:modified_time" content="2013-02-17T00:00:00Z">
+
+
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:site" content="@johnlcox">
+<meta name="twitter:creator" content="@johnlcox">
+<meta name="twitter:title" content="Differentiate Java Processes by Working Directory">
+<meta name="twitter:description" content="A lot of server software runs on Java, but the different Java processes are listed as simply Java via commands like top or ps -ef. One feature of the Stackify agent is tracking the running processes …">
+<meta name="twitter:image" content="https://s.gravatar.com/avatar/c268064d396bb4bafd31090d029bd8df?s=400"><script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "author": {
+    "@type": "Person",
+    "name": "John Leacox"
+  },
+  "dateModified": "2013-02-17T00:00:00Z",
+  "datePublished": "2013-02-17T00:00:00Z",
+  "description": "A lot of server software runs on Java, but the different Java processes are listed as simply Java via commands like top or ps -ef. One feature of the Stackify agent is tracking the running processes …",
+  "headline": "Differentiate Java Processes by Working Directory",
+  "image": "https://s.gravatar.com/avatar/c268064d396bb4bafd31090d029bd8df?s=400",
+  "mainEntityOfPage": "https://john.leacox.com/posts/differentiate-java-processes-by-working-directory/",
+  "publisher": {
+    "@type": "Organization",
+    "name": "Ideas on Software Engineering"
+  }
+}
+</script>
+
   <meta name="generator" content="Hugo 0.163.3">
 
   <title>Differentiate Java Processes by Working Directory &middot; Ideas on Software Engineering</title>
@@ -51,18 +88,12 @@
   
   <link href="https://fonts.googleapis.com/css?family=Raleway" rel="stylesheet" type="text/css">
 
-  
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-
  
   
 
   
-  <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.17.1/styles/solarized-dark.min.css">
-  <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.17.1/highlight.min.js"></script>
-  
-  <script>hljs.initHighlightingOnLoad();</script>
-  
+  <link rel="stylesheet" href="https://john.leacox.com/css/chroma-light.css">
+  <link rel="stylesheet" href="https://john.leacox.com/css/chroma-dark.css">
 
   <link rel="shortcut icon" href="https://john.leacox.com/img/favicon.ico" type="image/x-icon" />
 
@@ -301,10 +332,10 @@
 
   <p>A lot of server software runs on Java, but the different Java processes are listed as simply <code>Java</code> via commands like <code>top</code> or <code>ps -ef</code>. One feature of the <a href="http://www.stackify.com">Stackify</a> agent is tracking the running processes on a server. I needed a way to identify what each Java process really was in a fairly simple and concise way, but there isn’t a clear winner in the output of the top or ps commands.</p>
 <p>Running <code>ps -ef | grep java</code> will output something nasty, similar to what follows. You can likely figure out what the Java process is actually running from the args — the example below obviously being tomcat — however, it’s not the most readable and doesn’t give a clear and concise value to display to a user in the Stackify web site. The user of the process below also indicates that it is running tomcat, but that won’t be the case for all Java processes.</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-text" data-lang="text"><span style="display:flex;"><span>tomcat7 41298 1 5 18:05 ? 00:00:03 /usr/lib/jvm/default-java/bin/java -Djava.util.logging.config.file=/var/lib/tomcat7/conf/logging.properties -Djava.awt.headless=true -Xmx128m -XX:+UseConcMarkSweepGC -Djava.util.logging.manager=org.apache.juli.ClassLoaderLogManager -Djava.endorsed.dirs=/usr/share/tomcat7/endorsed -classpath /usr/share/tomcat7/bin/bootstrap.jar:/usr/share/tomcat7/bin/tomcat-juli.jar -Dcatalina.base=/var/lib/tomcat7 -Dcatalina.home=/usr/share/tomcat7 -Djava.io.tmpdir=/tmp/tomcat7-tomcat7-tmp org.apache.catalina.startup.Bootstrap start
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">tomcat7 41298 1 5 18:05 ? 00:00:03 /usr/lib/jvm/default-java/bin/java -Djava.util.logging.config.file=/var/lib/tomcat7/conf/logging.properties -Djava.awt.headless=true -Xmx128m -XX:+UseConcMarkSweepGC -Djava.util.logging.manager=org.apache.juli.ClassLoaderLogManager -Djava.endorsed.dirs=/usr/share/tomcat7/endorsed -classpath /usr/share/tomcat7/bin/bootstrap.jar:/usr/share/tomcat7/bin/tomcat-juli.jar -Dcatalina.base=/var/lib/tomcat7 -Dcatalina.home=/usr/share/tomcat7 -Djava.io.tmpdir=/tmp/tomcat7-tomcat7-tmp org.apache.catalina.startup.Bootstrap start
 </span></span></code></pre></div><p>I decided it might work to differentiate the Java processes by working directory, but I wasn’t sure if there was a good way to find the working directory. Through some Google searches I discovered the <code>pwdx</code> command. The <code>pwdx</code> command takes a list of pids as parameters and outputs a row with the pid and the working directory for each pid. The working directory doesn’t work for all situations, but I’ve found it generally gives a concise way of determining what a Java process is actually running. I’m certainly open to suggestions if anyone has a better idea.</p>
 <p>Running the pwdx command for the output above — <code>sudo pwdx 41298</code> — leads to the following output. By combining this with the process name I can give the Java processes a more informative name when displayed in the Stackify website. This Java process would be displayed as <code>Java (/var/lib/tomcat7)</code>.</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-text" data-lang="text"><span style="display:flex;"><span>41298: /var/lib/tomcat7
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">41298: /var/lib/tomcat7
 </span></span></code></pre></div>
   
   
@@ -350,22 +381,6 @@
 </div>
 <script src="https://john.leacox.com/js/ui.js"></script>
 <script src="https://john.leacox.com/js/menus.js"></script>
-
-
-<script>
-  
-  if (window.location.hostname != "localhost") {
-    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
-    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
-    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
-    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
-
-    ga('create', 'UA-36983897-3', 'auto');
-    ga('send', 'pageview');
-  }
-</script>
-
-
 
 
 
