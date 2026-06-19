@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Blogging on Ideas on Software Engineering</title>
+    <link>https://john.leacox.com/tags/blogging/</link>
+    <description>Recent content in Blogging on Ideas on Software Engineering</description>
+    <generator>Hugo</generator>
+    <language>en</language>
+    <atom:link href="https://john.leacox.com/tags/blogging/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Blogging is Hard</title>
+      <link>https://john.leacox.com/archive/blogging-is-hard/</link>
+      <pubDate>Fri, 14 Dec 2012 22:55:03 +0000</pubDate>
+      <guid>https://john.leacox.com/archive/blogging-is-hard/</guid>
+      <description>&lt;p&gt;I have decided to give blogging another go.  Over the years I have tried to get into blogging on varying topics including music and philosophy.  This will be my personal blog, with no specific topic, other than whatever random things enter my head.  To keep the blog going, I will make it my goal to create at least one new blog entry a month.  Upcoming post topics will likely include Pusher (specifically from a Java consumer standpoint) and my current exercise regimen.&lt;/p&gt;&#xA;</description>
+    </item>
+  </channel>
+</rss>

@@ -1,0 +1,16 @@
+/* Self-hosted Raleway (was loaded from Google Fonts — removed for privacy/speed).
+   font-display: swap avoids invisible text while the font loads. */
+@font-face {
+  font-family: "Raleway";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/fonts/raleway-400.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Raleway";
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url("/fonts/raleway-700.woff2") format("woff2");
+}
