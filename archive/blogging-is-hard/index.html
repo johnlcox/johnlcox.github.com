@@ -2,6 +2,16 @@
 <html lang="en">
 
 <head>
+  
+  <script>
+    (function () {
+      try {
+        var stored = localStorage.getItem('theme');
+        var theme = stored || ((window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) ? 'dark' : 'light');
+        document.documentElement.setAttribute('data-theme', theme);
+      } catch (e) {}
+    })();
+  </script>
   <meta http-equiv="content-type" content="text/html; charset=utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description" content="">
@@ -30,6 +40,10 @@
   <!--<![endif]-->
 
   <link rel="stylesheet" href="https://john.leacox.com/css/blackburn.css">
+
+  
+  <link rel="stylesheet" href="https://john.leacox.com/css/dark.css">
+  <script src="https://john.leacox.com/js/theme-toggle.js"></script>
 
   
   <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.9.0/css/all.css">
@@ -222,6 +236,16 @@
   </ul>
 </div>
 
+
+  <div class="pure-menu theme-toggle">
+    <ul class="pure-menu-list">
+      <li class="pure-menu-item">
+        <a href="#" id="theme-toggle" class="pure-menu-link" role="button" aria-label="Toggle dark mode">
+          <i class="fas fa-moon fa-fw"></i>Theme
+        </a>
+      </li>
+    </ul>
+  </div>
 
   <div>
   <div class="small-print">

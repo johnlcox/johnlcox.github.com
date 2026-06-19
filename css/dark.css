@@ -1,0 +1,69 @@
+/* Dark theme for blackburn.
+   Applies ONLY when <html data-theme="dark"> is set (via the toggle / OS preference).
+   Light mode is unaffected. The sidebar (#menu) is already #191818, so it harmonizes. */
+
+html[data-theme="dark"] body {
+  background-color: #1a1a1a;
+  color: #c2c2c2;
+}
+
+/* Main reading area */
+html[data-theme="dark"] .content {
+  color: #c2c2c2;
+}
+
+html[data-theme="dark"] h1,
+html[data-theme="dark"] h2,
+html[data-theme="dark"] h3,
+html[data-theme="dark"] h4,
+html[data-theme="dark"] h5,
+html[data-theme="dark"] h6 {
+  color: #e8e8e8;
+}
+
+/* Links */
+html[data-theme="dark"] a {
+  color: #5ab0f0;
+}
+html[data-theme="dark"] a:visited {
+  color: #b48ce0;
+}
+
+/* Inline code (override custom.css light values) */
+html[data-theme="dark"] code {
+  color: #f4a6a6;
+  background-color: #2a2a2a;
+  border-color: #3a3a3a;
+}
+/* Code blocks keep the solarized-dark highlightjs theme; just neutralize wrapper */
+html[data-theme="dark"] pre code {
+  color: inherit;
+  background-color: transparent;
+  border: 0;
+}
+
+/* Quotes, rules, tables */
+html[data-theme="dark"] blockquote {
+  color: #aeaeae;
+  border-left-color: #3a3a3a;
+}
+html[data-theme="dark"] hr {
+  border-color: #333;
+}
+html[data-theme="dark"] table th,
+html[data-theme="dark"] table td {
+  border-color: #3a3a3a;
+}
+
+/* Muted / meta text (post dates, etc.) */
+html[data-theme="dark"] .post-meta,
+html[data-theme="dark"] .meta,
+html[data-theme="dark"] time,
+html[data-theme="dark"] small {
+  color: #8a8a8a;
+}
+
+/* Theme toggle icon color in dark mode */
+html[data-theme="dark"] #theme-toggle {
+  color: #d8d8d8;
+}
